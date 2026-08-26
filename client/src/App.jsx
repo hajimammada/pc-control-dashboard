@@ -32,7 +32,9 @@ import {
   saveStoredSettings, 
   fetchAgentStatus, 
   triggerMacroDroid, 
-  executePowerAction 
+  executePowerAction,
+  unlockWindowsSession,
+  launchAntigravityApp
 } from './utils/api';
 
 export default function App() {
@@ -139,6 +141,34 @@ export default function App() {
       addToast(res.message || 'Shutdown/Restart cancelled!', 'success');
     } catch (err) {
       addToast(err.message || 'Failed to abort action', 'error');
+    }
+  };
+
+  const [isUnlockingSession, setIsUnlockingSession] = useState(false);
+
+  const handleUnlockAndOpenAntigravity = async () => {
+    if (!settings.windowsPassword) {
+      addToast('Please save your Windows password in Settings first for On-Demand Auto-Logon.', 'error');
+      setIsSettingsOpen(true);
+      return;
+    }
+
+    setIsUnlockingSession(true);
+    addToast('Arming 1-Time AutoLogon & Unlocking Windows session...', 'info');
+
+    try {
+      const res = await unlockWindowsSession(
+        settings.agentUrl, 
+        settings.agentKey, 
+        settings.windowsUsername || 'aliye', 
+        settings.windowsPassword, 
+        true
+      );
+      addToast(res.message || 'Windows session unlocked! Launching Antigravity...', 'success');
+    } catch (err) {
+      addToast(err.message || 'Failed to unlock Windows session', 'error');
+    } finally {
+      setIsUnlockingSession(false);
     }
   };
 
@@ -453,28 +483,39 @@ export default function App() {
                 <div>
                   <div className="flex items-center gap-2">
                     <h3 className="font-bold text-white text-lg group-hover:text-cyan-300 transition-colors">
-                      Google Antigravity Web Access
+                      Google Antigravity
                     </h3>
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
-                      Agentic IDE
+                      On-Demand Unlock
                     </span>
                   </div>
                   <p className="text-xs text-slate-300 mt-1.5 leading-relaxed">
-                    Launch your Antigravity agentic workspace, coding tools, and terminal session on this PC.
+                    Unlocks your Windows session on-demand (single-use) and launches your Antigravity IDE and agentic workspace.
                   </p>
                 </div>
               </div>
 
-              <a
-                href={antigravityUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-cyan-500/30 hover:shadow-cyan-500/50 transition-all duration-200"
-              >
-                <Terminal className="w-4 h-4" />
-                <span>Launch Google Antigravity Web</span>
-                <ArrowUpRight className="w-4 h-4" />
-              </a>
+              <div className="space-y-2.5">
+                <button
+                  onClick={handleUnlockAndOpenAntigravity}
+                  disabled={!isAgentOnline || isUnlockingSession}
+                  className="w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-slate-950 font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-cyan-500/30 hover:shadow-cyan-500/50 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                >
+                  <Sparkles className="w-4 h-4 text-slate-950" />
+                  <span>{isUnlockingSession ? 'Unlocking Windows Session...' : 'Unlock PC & Start Antigravity'}</span>
+                </button>
+
+                <a
+                  href={antigravityUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-2.5 px-4 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white font-medium text-[11px] flex items-center justify-center gap-1.5 border border-white/10 transition-all duration-200"
+                >
+                  <Terminal className="w-3.5 h-3.5" />
+                  <span>Open Antigravity Web Link</span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+              </div>
 
             </div>
 

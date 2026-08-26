@@ -218,6 +218,50 @@ export default function SettingsModal({
                 </div>
               </div>
 
+              {/* Windows On-Demand Auto-Logon Credentials */}
+              <div className="p-4 rounded-2xl bg-[#141c2e] border border-cyan-500/30">
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-xs font-bold text-white flex items-center gap-2">
+                    <Shield className="w-4 h-4 text-cyan-400" />
+                    Windows Logon Credentials (On-Demand Auto-Logon)
+                  </label>
+                  <span className="text-[10px] uppercase font-bold text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">
+                    Single-Use Unlock
+                  </span>
+                </div>
+                <p className="text-xs text-slate-400 mb-3 leading-relaxed">
+                  Saved only in your browser. Used securely to unlock your Windows session and launch Antigravity when you click the unlock button.
+                </p>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-400 mb-1">
+                      Windows Username
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.windowsUsername || ''}
+                      onChange={(e) => handleChange('windowsUsername', e.target.value)}
+                      placeholder="aliye"
+                      className="w-full bg-[#101726] border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 font-mono"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-400 mb-1">
+                      Windows Password
+                    </label>
+                    <input
+                      type="password"
+                      value={formData.windowsPassword || ''}
+                      onChange={(e) => handleChange('windowsPassword', e.target.value)}
+                      placeholder="Your Windows Password"
+                      className="w-full bg-[#101726] border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 font-mono"
+                    />
+                  </div>
+                </div>
+              </div>
+
             </div>
           )}
 
