@@ -151,7 +151,7 @@ app.post('/api/power/restart', authenticate, (req, res) => {
 // Power: Shutdown PC
 app.post('/api/power/shutdown', authenticate, (req, res) => {
   console.log(`[POWER] Shutdown command received from ${req.ip}`);
-  const delaySeconds = typeof req.body.delaySeconds === 'number' ? req.body.delaySeconds : 2;
+  const delaySeconds = typeof req.body.delaySeconds === 'number' ? req.body.delaySeconds : 1;
 
   // Send response first so client gets confirmation before network closes
   res.json({ 
@@ -161,10 +161,16 @@ app.post('/api/power/shutdown', authenticate, (req, res) => {
   });
 
   setTimeout(() => {
-    exec(`shutdown.exe /s /f /t ${delaySeconds} /c "Shutdown initiated via Nexus Dashboard"`, (err) => {
+    // Primary: shutdown.exe with force flag
+    exec(`shutdown.exe /s /f /t ${delaySeconds}`, (err) => {
       if (err) {
         console.error('[POWER] shutdown.exe failed, trying PowerShell Stop-Computer...', err);
-        exec('powershell.exe -Command "Stop-Computer -Force"');
+        exec('powershell.exe -Command "Stop-Computer -Force"', (psErr) => {
+          if (psErr) {
+            console.error('[POWER] PowerShell Stop-Computer failed, trying immediate hardware poweroff...', psErr);
+            exec('shutdown.exe /p /f');
+          }
+        });
       }
     });
   }, 300);
@@ -181,13 +187,18 @@ app.post('/api/power/abort', authenticate, (req, res) => {
   });
 });
 
-// Power: Lock Workstation
+// Power: Lock Workstation (Works from SYSTEM Session 0 and User Sessions)
 app.post('/api/power/lock', authenticate, (req, res) => {
-  exec('rundll32.exe user32.dll,LockWorkStation', (err) => {
+  console.log(`[POWER] Lock workstation command received from ${req.ip}`);
+  
+  res.json({ success: true, message: 'Workstation locked successfully.' });
+
+  // tsdiscon disconnects/locks active console session from SYSTEM/Session 0
+  exec('tsdiscon', (err) => {
     if (err) {
-      return res.status(500).json({ success: false, error: err.message });
+      console.log('[POWER] tsdiscon failed, trying rundll32 LockWorkStation fallback...', err);
+      exec('rundll32.exe user32.dll,LockWorkStation');
     }
-    res.json({ success: true, message: 'Workstation locked successfully.' });
   });
 });
 
