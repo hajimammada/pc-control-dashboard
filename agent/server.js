@@ -129,35 +129,45 @@ app.post('/api/power/sleep', authenticate, (req, res) => {
 // Power: Restart PC
 app.post('/api/power/restart', authenticate, (req, res) => {
   console.log(`[POWER] Restart command received from ${req.ip}`);
-  const delaySeconds = req.body.delaySeconds || 5;
+  const delaySeconds = typeof req.body.delaySeconds === 'number' ? req.body.delaySeconds : 2;
 
-  exec(`shutdown /r /t ${delaySeconds} /c "Restart initiated via Nexus Dashboard"`, (err, stdout, stderr) => {
-    if (err) {
-      return res.status(500).json({ success: false, error: stderr || err.message });
-    }
-    res.json({ 
-      success: true, 
-      message: `System will restart in ${delaySeconds} seconds.`,
-      abortAvailable: true
-    });
+  // Send response first so client gets confirmation before network closes
+  res.json({ 
+    success: true, 
+    message: `System will restart in ${delaySeconds} seconds (forced).`,
+    abortAvailable: true
   });
+
+  setTimeout(() => {
+    exec(`shutdown.exe /r /f /t ${delaySeconds} /c "Restart initiated via Nexus Dashboard"`, (err) => {
+      if (err) {
+        console.error('[POWER] shutdown.exe restart failed, trying PowerShell...', err);
+        exec('powershell.exe -Command "Restart-Computer -Force"');
+      }
+    });
+  }, 300);
 });
 
 // Power: Shutdown PC
 app.post('/api/power/shutdown', authenticate, (req, res) => {
   console.log(`[POWER] Shutdown command received from ${req.ip}`);
-  const delaySeconds = req.body.delaySeconds || 5;
+  const delaySeconds = typeof req.body.delaySeconds === 'number' ? req.body.delaySeconds : 2;
 
-  exec(`shutdown /s /t ${delaySeconds} /c "Shutdown initiated via Nexus Dashboard"`, (err, stdout, stderr) => {
-    if (err) {
-      return res.status(500).json({ success: false, error: stderr || err.message });
-    }
-    res.json({ 
-      success: true, 
-      message: `System will shut down in ${delaySeconds} seconds.`,
-      abortAvailable: true
-    });
+  // Send response first so client gets confirmation before network closes
+  res.json({ 
+    success: true, 
+    message: `System will shut down in ${delaySeconds} seconds (forced).`,
+    abortAvailable: true
   });
+
+  setTimeout(() => {
+    exec(`shutdown.exe /s /f /t ${delaySeconds} /c "Shutdown initiated via Nexus Dashboard"`, (err) => {
+      if (err) {
+        console.error('[POWER] shutdown.exe failed, trying PowerShell Stop-Computer...', err);
+        exec('powershell.exe -Command "Stop-Computer -Force"');
+      }
+    });
+  }, 300);
 });
 
 // Power: Abort pending shutdown or restart
