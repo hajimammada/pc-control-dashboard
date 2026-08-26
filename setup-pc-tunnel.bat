@@ -15,7 +15,7 @@ echo 5. In the "Public Hostnames" tab, add:
 echo      Subdomain: pc
 echo      Domain:    hajimammad.com
 echo      Type:      HTTP
-echo      URL:       localhost:49880
+echo      URL:       localhost:48880
 echo 6. Done! https://pc.hajimammad.com will now permanently route to this PC!
 echo.
 echo =====================================================================

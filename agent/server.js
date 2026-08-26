@@ -4,10 +4,10 @@ const os = require('os');
 const { exec, execFile } = require('child_process');
 const path = require('path');
 const fs = require('fs');
-require('dotenv').config();
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const app = express();
-const PORT = process.env.PORT || 49880;
+const PORT = process.env.PORT || 48880;
 const AGENT_KEY = process.env.AGENT_KEY || 'nexus-secret-key-2026';
 
 // Middleware

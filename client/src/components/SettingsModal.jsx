@@ -174,7 +174,7 @@ export default function SettingsModal({
                   </span>
                 </div>
                 <p className="text-xs text-slate-400 mb-3 leading-relaxed">
-                  Remote Endpoint: <code className="text-cyan-300 font-mono">https://pc.hajimammad.com</code> (or <code className="text-slate-300">http://localhost:49880</code> when on the same PC).
+                  Remote Endpoint: <code className="text-cyan-300 font-mono">https://pc.hajimammad.com</code> (or <code className="text-slate-300">http://localhost:48880</code> when on the same PC).
                 </p>
                 
                 <div className="space-y-3">
@@ -256,7 +256,7 @@ export default function SettingsModal({
                   type="text"
                   value={formData.antigravityUrl}
                   onChange={(e) => handleChange('antigravityUrl', e.target.value)}
-                  placeholder="http://localhost:49880"
+                  placeholder="http://localhost:48880"
                   className="w-full bg-[#101726] border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 font-mono"
                 />
               </div>

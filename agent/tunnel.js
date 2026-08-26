@@ -4,9 +4,9 @@
 const { startTunnel } = require('untun');
 const { spawn } = require('child_process');
 const path = require('path');
-require('dotenv').config();
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 
-const PORT = process.env.PORT || 49880;
+const PORT = process.env.PORT || 48880;
 
 async function run() {
   console.log('================================================================');
