@@ -15,7 +15,7 @@ echo ========================================================
 echo.
 echo If prompted to log in, Cloudflare will open your browser.
 echo.
-npx wrangler pages deploy extension --project-name=nexus-pc-control --commit-dirty=true
+npx wrangler pages deploy dist --project-name=nexus-pc-control --commit-dirty=true
 
 echo ========================================================
 echo Deployment finished!
