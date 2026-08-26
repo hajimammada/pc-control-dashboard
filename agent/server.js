@@ -187,17 +187,16 @@ app.post('/api/power/abort', authenticate, (req, res) => {
   });
 });
 
-// Power: Lock Workstation (Works from SYSTEM Session 0 and User Sessions)
+// Power: Lock Workstation
 app.post('/api/power/lock', authenticate, (req, res) => {
   console.log(`[POWER] Lock workstation command received from ${req.ip}`);
   
   res.json({ success: true, message: 'Workstation locked successfully.' });
 
-  // tsdiscon disconnects/locks active console session from SYSTEM/Session 0
-  exec('tsdiscon', (err) => {
+  exec('rundll32.exe user32.dll,LockWorkStation', (err) => {
     if (err) {
-      console.log('[POWER] tsdiscon failed, trying rundll32 LockWorkStation fallback...', err);
-      exec('rundll32.exe user32.dll,LockWorkStation');
+      console.log('[POWER] rundll32 failed, trying tsdiscon...', err);
+      exec('tsdiscon');
     }
   });
 });
