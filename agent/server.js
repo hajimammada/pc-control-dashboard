@@ -112,19 +112,28 @@ const SHUTDOWN_PATH = 'C:\\Windows\\System32\\shutdown.exe';
 const TSDISCON_PATH = 'C:\\Windows\\System32\\tsdiscon.exe';
 const RUNDLL32_PATH = 'C:\\Windows\\System32\\rundll32.exe';
 
+const LOG_FILE = path.join(__dirname, 'agent_activity.log');
+function logAction(msg) {
+  const entry = `[${new Date().toISOString()}] ${msg}\n`;
+  try { fs.appendFileSync(LOG_FILE, entry); } catch (e) {}
+  console.log(msg);
+}
+
 // Power: Sleep PC (Works before and after unlock)
 app.post('/api/power/sleep', authenticate, (req, res) => {
-  console.log(`[POWER] Sleep command received from ${req.ip}`);
+  logAction(`[POWER] Sleep command received from ${req.ip}`);
   res.json({ success: true, message: 'Initiating PC sleep mode...' });
 
   setTimeout(() => {
     execFile(POWERSHELL_PATH, [
       '-NoProfile', '-ExecutionPolicy', 'Bypass',
       '-Command', 'Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.Application]::SetSuspendState([System.Windows.Forms.PowerState]::Suspend, $false, $false)'
-    ], (err) => {
+    ], (err, stdout, stderr) => {
       if (err) {
-        console.error('[POWER] Sleep via PowerShell failed, trying fallback...', err);
+        logAction(`[POWER] Sleep via PowerShell failed (${err.message}), trying fallback...`);
         execFile(RUNDLL32_PATH, ['powrprof.dll,SetSuspendState', '0,1,0']);
+      } else {
+        logAction('[POWER] Sleep command executed successfully.');
       }
     });
   }, 400);
@@ -132,15 +141,16 @@ app.post('/api/power/sleep', authenticate, (req, res) => {
 
 // Power: Restart PC (Works before and after unlock)
 app.post('/api/power/restart', authenticate, (req, res) => {
-  console.log(`[POWER] Restart command received from ${req.ip}`);
-  res.json({ success: true, message: 'Initiating PC restart (forced)...', abortAvailable: false });
+  logAction(`[POWER] Restart command received from ${req.ip}`);
+  res.json({ success: true, message: 'Initiating PC restart (1s delay)...', abortAvailable: false });
 
   setTimeout(() => {
-    // Primary: shutdown.exe /r /f /t 0
-    execFile(SHUTDOWN_PATH, ['/r', '/f', '/t', '0'], (err) => {
+    execFile(SHUTDOWN_PATH, ['/r', '/t', '1'], (err, stdout, stderr) => {
       if (err) {
-        console.error('[POWER] shutdown.exe restart failed, trying PowerShell Restart-Computer...', err);
+        logAction(`[POWER] shutdown /r failed: ${err.message}. Trying PowerShell fallback...`);
         execFile(POWERSHELL_PATH, ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-Command', 'Restart-Computer -Force']);
+      } else {
+        logAction('[POWER] shutdown /r /t 1 dispatched successfully.');
       }
     });
   }, 400);
@@ -148,20 +158,16 @@ app.post('/api/power/restart', authenticate, (req, res) => {
 
 // Power: Shutdown PC (Works before and after unlock)
 app.post('/api/power/shutdown', authenticate, (req, res) => {
-  console.log(`[POWER] Shutdown command received from ${req.ip}`);
-  res.json({ success: true, message: 'Initiating PC shutdown (forced)...', abortAvailable: false });
+  logAction(`[POWER] Shutdown command received from ${req.ip}`);
+  res.json({ success: true, message: 'Initiating PC shutdown (1s delay)...', abortAvailable: false });
 
   setTimeout(() => {
-    // Primary: shutdown.exe /s /f /t 0
-    execFile(SHUTDOWN_PATH, ['/s', '/f', '/t', '0'], (err) => {
+    execFile(SHUTDOWN_PATH, ['/s', '/t', '1'], (err, stdout, stderr) => {
       if (err) {
-        console.error('[POWER] shutdown.exe failed, trying PowerShell Stop-Computer...', err);
-        execFile(POWERSHELL_PATH, ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-Command', 'Stop-Computer -Force'], (psErr) => {
-          if (psErr) {
-            console.error('[POWER] PowerShell Stop-Computer failed, trying immediate hardware poweroff...', psErr);
-            execFile(SHUTDOWN_PATH, ['/p', '/f']);
-          }
-        });
+        logAction(`[POWER] shutdown /s failed: ${err.message}. Trying PowerShell fallback...`);
+        execFile(POWERSHELL_PATH, ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-Command', 'Stop-Computer -Force']);
+      } else {
+        logAction('[POWER] shutdown /s /t 1 dispatched successfully.');
       }
     });
   }, 400);
@@ -169,7 +175,7 @@ app.post('/api/power/shutdown', authenticate, (req, res) => {
 
 // Power: Abort pending shutdown or restart
 app.post('/api/power/abort', authenticate, (req, res) => {
-  console.log(`[POWER] Abort command received`);
+  logAction(`[POWER] Abort command received`);
   execFile(SHUTDOWN_PATH, ['/a'], (err, stdout, stderr) => {
     if (err) {
       return res.status(400).json({ success: false, error: stderr || err.message });
@@ -180,12 +186,12 @@ app.post('/api/power/abort', authenticate, (req, res) => {
 
 // Power: Lock Workstation (Works from SYSTEM Session 0 and User Sessions)
 app.post('/api/power/lock', authenticate, (req, res) => {
-  console.log(`[POWER] Lock workstation command received from ${req.ip}`);
+  logAction(`[POWER] Lock workstation command received from ${req.ip}`);
   res.json({ success: true, message: 'Workstation lock signal dispatched.' });
 
   setTimeout(() => {
-    execFile(TSDISCON_PATH, ['1'], () => {
-      execFile(TSDISCON_PATH, ['console'], () => {
+    execFile(TSDISCON_PATH, ['1'], (err1) => {
+      execFile(TSDISCON_PATH, ['console'], (err2) => {
         execFile(RUNDLL32_PATH, ['user32.dll,LockWorkStation']);
       });
     });
