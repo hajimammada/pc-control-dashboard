@@ -107,79 +107,71 @@ app.get('/api/status', authenticate, (req, res) => {
   }
 });
 
-// Power: Sleep PC
+const POWERSHELL_PATH = 'C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe';
+const SHUTDOWN_PATH = 'C:\\Windows\\System32\\shutdown.exe';
+const TSDISCON_PATH = 'C:\\Windows\\System32\\tsdiscon.exe';
+
+function runPowerShell(script, callback) {
+  const cmd = `"${POWERSHELL_PATH}" -NoProfile -ExecutionPolicy Bypass -Command "${script.replace(/"/g, '\\"')}"`;
+  exec(cmd, callback);
+}
+
+// Power: Sleep PC (Works before and after unlock)
 app.post('/api/power/sleep', authenticate, (req, res) => {
-  console.log(`[POWER] Sleep command received from ${req.ip} at ${new Date().toISOString()}`);
-  
-  // Return response immediately before putting PC to sleep
+  console.log(`[POWER] Sleep command received from ${req.ip}`);
   res.json({ success: true, message: 'Initiating PC sleep mode...' });
 
   setTimeout(() => {
-    // Windows Sleep command via PowerShell / rundll32
-    const cmd = 'powershell -Command "Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.Application]::SetSuspendState([System.Windows.Forms.PowerState]::Suspend, $false, $false)"';
-    exec(cmd, (err, stdout, stderr) => {
+    runPowerShell('Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.Application]::SetSuspendState([System.Windows.Forms.PowerState]::Suspend, $false, $false)', (err) => {
       if (err) {
-        console.error('[POWER] Sleep failed via PowerShell, trying fallback...', err);
+        console.error('[POWER] Sleep via PowerShell failed, trying fallback...', err);
         exec('rundll32.exe powrprof.dll,SetSuspendState 0,1,0');
       }
     });
-  }, 1000);
+  }, 400);
 });
 
-// Power: Restart PC
+// Power: Restart PC (Works before and after unlock)
 app.post('/api/power/restart', authenticate, (req, res) => {
   console.log(`[POWER] Restart command received from ${req.ip}`);
-  const delaySeconds = typeof req.body.delaySeconds === 'number' ? req.body.delaySeconds : 2;
-
-  // Send response first so client gets confirmation before network closes
-  res.json({ 
-    success: true, 
-    message: `System will restart in ${delaySeconds} seconds (forced).`,
-    abortAvailable: true
-  });
+  res.json({ success: true, message: 'Initiating PC restart (forced)...', abortAvailable: false });
 
   setTimeout(() => {
-    exec(`shutdown.exe /r /f /t ${delaySeconds} /c "Restart initiated via Nexus Dashboard"`, (err) => {
-      if (err) {
-        console.error('[POWER] shutdown.exe restart failed, trying PowerShell...', err);
-        exec('powershell.exe -Command "Restart-Computer -Force"');
+    // Primary: PowerShell Restart-Computer -Force
+    runPowerShell('Restart-Computer -Force', (psErr) => {
+      if (psErr) {
+        console.error('[POWER] PowerShell Restart-Computer failed, trying shutdown.exe...', psErr);
+        exec(`"${SHUTDOWN_PATH}" /r /f /t 0`);
       }
     });
-  }, 300);
+  }, 400);
 });
 
-// Power: Shutdown PC
+// Power: Shutdown PC (Works before and after unlock)
 app.post('/api/power/shutdown', authenticate, (req, res) => {
   console.log(`[POWER] Shutdown command received from ${req.ip}`);
-  const delaySeconds = typeof req.body.delaySeconds === 'number' ? req.body.delaySeconds : 1;
-
-  // Send response first so client gets confirmation before network closes
-  res.json({ 
-    success: true, 
-    message: `System will shut down in ${delaySeconds} seconds (forced).`,
-    abortAvailable: true
-  });
+  res.json({ success: true, message: 'Initiating PC shutdown (forced)...', abortAvailable: false });
 
   setTimeout(() => {
-    // Primary: shutdown.exe with force flag
-    exec(`shutdown.exe /s /f /t ${delaySeconds}`, (err) => {
-      if (err) {
-        console.error('[POWER] shutdown.exe failed, trying PowerShell Stop-Computer...', err);
-        exec('powershell.exe -Command "Stop-Computer -Force"', (psErr) => {
-          if (psErr) {
-            console.error('[POWER] PowerShell Stop-Computer failed, trying immediate hardware poweroff...', psErr);
-            exec('shutdown.exe /p /f');
+    // Primary: PowerShell Stop-Computer -Force
+    runPowerShell('Stop-Computer -Force', (psErr) => {
+      if (psErr) {
+        console.error('[POWER] PowerShell Stop-Computer failed, trying shutdown.exe...', psErr);
+        exec(`"${SHUTDOWN_PATH}" /s /f /t 0`, (sErr) => {
+          if (sErr) {
+            console.error('[POWER] shutdown /s failed, executing immediate hardware power-off...', sErr);
+            exec(`"${SHUTDOWN_PATH}" /p /f`);
           }
         });
       }
     });
-  }, 300);
+  }, 400);
 });
 
 // Power: Abort pending shutdown or restart
 app.post('/api/power/abort', authenticate, (req, res) => {
   console.log(`[POWER] Abort command received`);
-  exec('shutdown /a', (err, stdout, stderr) => {
+  exec(`"${SHUTDOWN_PATH}" /a`, (err, stdout, stderr) => {
     if (err) {
       return res.status(400).json({ success: false, error: stderr || err.message });
     }
@@ -187,18 +179,19 @@ app.post('/api/power/abort', authenticate, (req, res) => {
   });
 });
 
-// Power: Lock Workstation
+// Power: Lock Workstation (Works from SYSTEM Session 0 and User Sessions)
 app.post('/api/power/lock', authenticate, (req, res) => {
   console.log(`[POWER] Lock workstation command received from ${req.ip}`);
-  
-  res.json({ success: true, message: 'Workstation locked successfully.' });
+  res.json({ success: true, message: 'Workstation lock signal dispatched.' });
 
-  exec('rundll32.exe user32.dll,LockWorkStation', (err) => {
-    if (err) {
-      console.log('[POWER] rundll32 failed, trying tsdiscon...', err);
-      exec('tsdiscon');
-    }
-  });
+  setTimeout(() => {
+    // Disconnect active console session (works under SYSTEM and user)
+    exec(`"${TSDISCON_PATH}" 1`, () => {
+      exec(`"${TSDISCON_PATH}" console`, () => {
+        exec('rundll32.exe user32.dll,LockWorkStation');
+      });
+    });
+  }, 300);
 });
 
 // Session: Check active user session status
