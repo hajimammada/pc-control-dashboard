@@ -218,15 +218,15 @@ function formatUptime(seconds) {
   return `${m}m`;
 }
 
-// Serve Dashboard UI statically for web browsers visiting pc.hajimammad.com directly
-const staticPath = path.join(__dirname, '../extension');
-if (fs.existsSync(staticPath)) {
-  app.use(express.static(staticPath));
-  app.get('*', (req, res, next) => {
-    if (req.path.startsWith('/api')) return next();
-    res.sendFile(path.join(staticPath, 'index.html'));
+// Root API info endpoint (pcagent is pure API, pc.hajimammad.com is the website)
+app.get('/', (req, res) => {
+  res.json({
+    status: 'online',
+    service: 'Nexus PC Companion API',
+    version: '1.0.0',
+    website: 'https://pc.hajimammad.com'
   });
-}
+});
 
 // Start Server
 app.listen(PORT, '0.0.0.0', () => {
