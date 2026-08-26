@@ -218,6 +218,16 @@ function formatUptime(seconds) {
   return `${m}m`;
 }
 
+// Serve Dashboard UI statically for web browsers visiting pc.hajimammad.com directly
+const staticPath = path.join(__dirname, '../extension');
+if (fs.existsSync(staticPath)) {
+  app.use(express.static(staticPath));
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api')) return next();
+    res.sendFile(path.join(staticPath, 'index.html'));
+  });
+}
+
 // Start Server
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`=======================================================`);
