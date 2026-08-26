@@ -7,16 +7,10 @@ import {
   Key, 
   Monitor, 
   Bot, 
-  Search, 
-  Download, 
-  Upload, 
-  RotateCcw, 
-  Check, 
-  HelpCircle, 
+  FileCode,
+  CheckCircle2,
   ExternalLink,
-  Shield,
-  Layers,
-  FileCode
+  Shield
 } from 'lucide-react';
 import { triggerMacroDroid, fetchAgentStatus } from '../utils/api';
 
@@ -25,9 +19,6 @@ export default function SettingsModal({
   onClose, 
   settings, 
   onSaveSettings, 
-  apps, 
-  onRestoreDefaultApps,
-  onImportData,
   onShowToast
 }) {
   const [formData, setFormData] = useState({ ...settings });
@@ -85,49 +76,9 @@ export default function SettingsModal({
     }
   };
 
-  const handleExportJson = () => {
-    const exportData = {
-      version: '1.0.0',
-      timestamp: new Date().toISOString(),
-      settings: formData,
-      apps: apps
-    };
-    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `nexus-dashboard-backup-${new Date().toISOString().slice(0, 10)}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-    onShowToast('Configuration exported to JSON file!', 'success');
-  };
-
-  const handleImportJson = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      try {
-        const parsed = JSON.parse(event.target?.result);
-        if (parsed.settings) {
-          setFormData(parsed.settings);
-          onSaveSettings(parsed.settings);
-        }
-        if (parsed.apps && Array.isArray(parsed.apps)) {
-          onImportData(parsed.apps);
-        }
-        onShowToast('Backup imported successfully!', 'success');
-      } catch (err) {
-        onShowToast('Invalid backup JSON file.', 'error');
-      }
-    };
-    reader.readAsText(file);
-  };
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-fade-in">
-      <div className="relative w-full max-w-2xl rounded-3xl bg-[#101726] border border-slate-700 shadow-2xl overflow-hidden animate-slide-up flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
+      <div className="relative w-full max-w-xl rounded-3xl bg-[#101726] border border-slate-700 shadow-2xl overflow-hidden animate-slide-up flex flex-col max-h-[90vh]">
         
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-[#0d1320]">
@@ -136,8 +87,8 @@ export default function SettingsModal({
               <Settings className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-bold text-white text-base">Dashboard & PC Remote Settings</h3>
-              <p className="text-xs text-slate-400">Configure webhooks, remote agent, endpoints & new tab</p>
+              <h3 className="font-bold text-white text-base">PC Remote & Power Settings</h3>
+              <p className="text-xs text-slate-400">Configure MacroDroid, remote agent & New Tab extension</p>
             </div>
           </div>
 
@@ -155,7 +106,7 @@ export default function SettingsModal({
             onClick={() => setActiveTab('general')}
             className={`pb-2.5 px-3 border-b-2 transition-colors ${activeTab === 'general' ? 'border-cyan-400 text-cyan-300' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
           >
-            PC Power & Webhooks
+            Power & Webhooks
           </button>
           <button
             onClick={() => setActiveTab('remote')}
@@ -168,12 +119,6 @@ export default function SettingsModal({
             className={`pb-2.5 px-3 border-b-2 transition-colors ${activeTab === 'chrome' ? 'border-cyan-400 text-cyan-300' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
           >
             Chrome New Tab Setup
-          </button>
-          <button
-            onClick={() => setActiveTab('backup')}
-            className={`pb-2.5 px-3 border-b-2 transition-colors ${activeTab === 'backup' ? 'border-cyan-400 text-cyan-300' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
-          >
-            Backup & Sync
           </button>
         </div>
 
@@ -196,7 +141,7 @@ export default function SettingsModal({
                   </span>
                 </div>
                 <p className="text-xs text-slate-400 mb-3 leading-relaxed">
-                  Enter your MacroDroid webhook trigger URL (e.g. from your phone's MacroDroid webhook action):
+                  Enter your MacroDroid webhook URL (e.g. from your phone's MacroDroid webhook trigger):
                 </p>
                 <div className="flex items-center gap-2">
                   <input
@@ -229,7 +174,7 @@ export default function SettingsModal({
                   </span>
                 </div>
                 <p className="text-xs text-slate-400 mb-3 leading-relaxed">
-                  Local address: <code className="text-slate-300">http://localhost:49880</code>. For access from mobile/anywhere, use your Cloudflare Tunnel URL.
+                  Local address: <code className="text-slate-300">http://localhost:49880</code>. For access from mobile outside WiFi, run <code className="text-purple-300">start-agent-remote.bat</code> and paste the tunnel HTTPS URL here.
                 </p>
                 
                 <div className="space-y-3">
@@ -238,7 +183,7 @@ export default function SettingsModal({
                       type="text"
                       value={formData.agentUrl}
                       onChange={(e) => handleChange('agentUrl', e.target.value)}
-                      placeholder="http://localhost:49880 or https://pc.yourdomain.com"
+                      placeholder="http://localhost:49880 or https://xxx.trycloudflare.com"
                       className="flex-1 bg-[#101726] border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 font-mono"
                     />
                     <button
@@ -316,24 +261,6 @@ export default function SettingsModal({
                 />
               </div>
 
-              {/* Search Engine */}
-              <div className="p-4 rounded-2xl bg-[#141c2e] border border-slate-700">
-                <label className="text-xs font-bold text-white flex items-center gap-2 mb-1.5">
-                  <Search className="w-4 h-4 text-slate-300" />
-                  Default Search Engine
-                </label>
-                <select
-                  value={formData.searchEngine}
-                  onChange={(e) => handleChange('searchEngine', e.target.value)}
-                  className="w-full bg-[#101726] border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-500"
-                >
-                  <option value="google">Google</option>
-                  <option value="duckduckgo">DuckDuckGo</option>
-                  <option value="youtube">YouTube</option>
-                  <option value="github">GitHub</option>
-                </select>
-              </div>
-
             </div>
           )}
 
@@ -362,66 +289,12 @@ export default function SettingsModal({
                   </div>
                 </li>
                 <li>
-                  Open a new tab in Chrome! You will immediately see your Nexus Command Center!
+                  Open a new tab in Chrome! You will immediately see your PC Command Center!
                 </li>
               </ol>
 
               <div className="p-3 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-xs text-cyan-200">
-                ✨ <strong>Zero Latency:</strong> Because it is bundled locally as an extension, opening new tabs is instantaneous!
-              </div>
-            </div>
-          )}
-
-          {/* TAB 4: BACKUP & SYNC */}
-          {activeTab === 'backup' && (
-            <div className="space-y-4">
-              <div className="p-4 rounded-2xl bg-[#141c2e] border border-slate-700">
-                <h4 className="text-xs font-bold text-white mb-1">Export / Import Configuration</h4>
-                <p className="text-xs text-slate-400 mb-4">
-                  Export all your apps, webhooks, and settings to a JSON file to easily sync across other PCs.
-                </p>
-
-                <div className="flex items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={handleExportJson}
-                    className="flex-1 py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs flex items-center justify-center gap-2 border border-slate-700 transition-colors"
-                  >
-                    <Download className="w-4 h-4 text-cyan-400" />
-                    <span>Export JSON Backup</span>
-                  </button>
-
-                  <label className="flex-1 py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs flex items-center justify-center gap-2 border border-slate-700 transition-colors cursor-pointer text-center">
-                    <Upload className="w-4 h-4 text-purple-400" />
-                    <span>Import JSON Backup</span>
-                    <input
-                      type="file"
-                      accept=".json"
-                      onChange={handleImportJson}
-                      className="hidden"
-                    />
-                  </label>
-                </div>
-              </div>
-
-              <div className="p-4 rounded-2xl bg-[#141c2e] border border-slate-700">
-                <h4 className="text-xs font-bold text-white mb-1">Restore Default Workspace Apps</h4>
-                <p className="text-xs text-slate-400 mb-3">
-                  Reset the app launcher to initial workspace projects (Trading bots, LuxeCraft, KaryeraHub, hajimammad.com, etc.).
-                </p>
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (window.confirm('Reset all apps to default workspace list?')) {
-                      onRestoreDefaultApps();
-                      onShowToast('Apps restored to defaults!', 'success');
-                    }
-                  }}
-                  className="py-2 px-4 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 text-xs font-bold border border-rose-500/30 transition-colors flex items-center gap-2"
-                >
-                  <RotateCcw className="w-3.5 h-3.5" />
-                  <span>Restore Defaults</span>
-                </button>
+                ✨ <strong>Zero Latency:</strong> Packaged locally as a lightweight Chrome extension so every new tab loads instantly.
               </div>
             </div>
           )}
