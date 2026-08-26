@@ -1,18 +1,15 @@
 // Nexus Dashboard API & Storage Utilities
 
-const SETTINGS_KEY = 'nexus_dashboard_settings_v1';
-const APPS_KEY = 'nexus_dashboard_apps_v1';
+const SETTINGS_KEY = 'nexus_dashboard_settings_v2';
 
 export const DEFAULT_SETTINGS = {
   macrodroidWebhookUrl: '', // e.g. https://trigger.macrodroid.com/xxxx/power-on
-  agentUrl: 'http://localhost:49880',
+  agentUrl: 'https://pc.hajimammad.com',
   agentKey: 'nexus-secret-key-2026',
   remoteDesktopUrl: 'https://remotedesktop.google.com/access',
-  antigravityUrl: 'http://localhost:49880',
-  searchEngine: 'google', // 'google' | 'duckduckgo' | 'bing' | 'youtube' | 'github'
-  theme: 'cyber-dark', // 'cyber-dark' | 'obsidian' | 'matrix' | 'aurora'
+  antigravityUrl: 'https://pc.hajimammad.com',
   autoRefreshStats: true,
-  refreshIntervalMs: 5000
+  refreshIntervalMs: 4000
 };
 
 // Load settings from localStorage
@@ -37,28 +34,6 @@ export function saveStoredSettings(settings) {
   }
 }
 
-// Load apps from localStorage
-export function getStoredApps(defaultApps) {
-  try {
-    const saved = localStorage.getItem(APPS_KEY);
-    if (saved) {
-      return JSON.parse(saved);
-    }
-  } catch (e) {
-    console.error('Error loading apps:', e);
-  }
-  return defaultApps;
-}
-
-// Save apps to localStorage
-export function saveStoredApps(apps) {
-  try {
-    localStorage.setItem(APPS_KEY, JSON.stringify(apps));
-  } catch (e) {
-    console.error('Error saving apps:', e);
-  }
-}
-
 // Trigger MacroDroid Webhook
 export async function triggerMacroDroid(webhookUrl, agentUrl = null) {
   if (!webhookUrl || !webhookUrl.trim()) {
@@ -67,7 +42,7 @@ export async function triggerMacroDroid(webhookUrl, agentUrl = null) {
 
   const cleanUrl = webhookUrl.trim();
 
-  // Try direct fetch first (no-cors mode to bypass CORS restriction in browser if needed)
+  // Try direct fetch first
   try {
     await fetch(cleanUrl, {
       method: 'GET',
@@ -79,7 +54,7 @@ export async function triggerMacroDroid(webhookUrl, agentUrl = null) {
     console.warn('Direct fetch failed, attempting relay via PC Agent...', err);
   }
 
-  // If direct failed or agent available, try agent relay
+  // If direct failed, try agent relay
   if (agentUrl) {
     try {
       const res = await fetch(`${agentUrl.replace(/\/$/, '')}/api/trigger-webhook`, {
@@ -96,11 +71,11 @@ export async function triggerMacroDroid(webhookUrl, agentUrl = null) {
     }
   }
 
-  // Fallback: create invisible img beacon
+  // Fallback image beacon
   return new Promise((resolve) => {
     const img = new Image();
     img.onload = () => resolve({ success: true, message: 'MacroDroid signal sent via Webhook Beacon!' });
-    img.onerror = () => resolve({ success: true, message: 'MacroDroid signal sent (Request Dispatched)!' });
+    img.onerror = () => resolve({ success: true, message: 'MacroDroid signal dispatched!' });
     img.src = `${cleanUrl}${cleanUrl.includes('?') ? '&' : '?'}_t=${Date.now()}`;
   });
 }
@@ -111,7 +86,7 @@ export async function fetchAgentStatus(agentUrl, agentKey) {
   
   const baseUrl = agentUrl.replace(/\/$/, '');
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 4000);
+  const timeoutId = setTimeout(() => controller.abort(), 4500);
 
   try {
     const headers = { 'Content-Type': 'application/json' };
@@ -137,7 +112,7 @@ export async function fetchAgentStatus(agentUrl, agentKey) {
     return { online: false, error: data.error || 'Agent returned error' };
   } catch (err) {
     clearTimeout(timeoutId);
-    return { online: false, error: err.name === 'AbortError' ? 'Connection timed out' : 'Agent offline' };
+    return { online: false, error: err.name === 'AbortError' ? 'Connection timed out' : 'Agent offline / standby' };
   }
 }
 
