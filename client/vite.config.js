@@ -5,8 +5,8 @@ export default defineConfig({
   plugins: [react()],
   base: './',
   build: {
-    outDir: '../extension',
-    emptyOutDir: false,
+    outDir: '../dist',
+    emptyOutDir: true,
   },
   server: {
     port: 3000,

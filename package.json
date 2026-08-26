@@ -3,7 +3,7 @@
   "version": "1.4.0",
   "description": "Universal PC Remote Controller Startpage and Dashboard",
   "scripts": {
-    "build": "cd client && npm install && npm run build",
+    "build": "cd client && npm install && npm run build && node -e \"const fs=require('fs'); fs.cpSync('./dist', './extension', {recursive:true}); fs.copyFileSync('./dist/index.html', './index.html'); fs.cpSync('./dist/assets', './assets', {recursive:true});\"",
     "start": "node agent/server.js"
   }
 }
