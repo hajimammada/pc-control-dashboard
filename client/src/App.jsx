@@ -34,7 +34,7 @@ import {
   launchAntigravityApp 
 } from './utils/api';
 
-const APP_VERSION = 'v2.0.2';
+const APP_VERSION = 'v2.0.3';
 
 export default function App() {
   const [settings, setSettings] = useState(() => getStoredSettings());
@@ -151,7 +151,7 @@ export default function App() {
   const ramPercent = telemetry?.ramUsagePercent || 0;
 
   const remoteDesktopUrl = settings.remoteDesktopUrl || 'https://remotedesktop.google.com/access';
-  const antigravityUrl = settings.antigravityUrl || '';
+  const antigravityUrl = settings.antigravityUrl || 'https://antigravity.google.com';
 
   return (
     <div className="min-h-screen bg-[#080b12] text-slate-100 flex flex-col justify-between selection:bg-cyan-500/30 selection:text-cyan-200">

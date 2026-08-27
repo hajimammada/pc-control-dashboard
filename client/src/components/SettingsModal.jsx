@@ -252,7 +252,7 @@ export default function SettingsModal({
                   type="text"
                   value={formData.antigravityUrl || ''}
                   onChange={(e) => handleChange('antigravityUrl', e.target.value)}
-                  placeholder="https://your-antigravity.domain.com"
+                  placeholder="https://antigravity.google.com"
                   className="w-full bg-[#101726] border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 font-mono"
                 />
               </div>
