@@ -4,7 +4,7 @@ const SETTINGS_KEY = 'nexus_dashboard_settings_v3';
 
 export const DEFAULT_SETTINGS = {
   macrodroidWebhookUrl: '', // e.g. https://trigger.macrodroid.com/xxxx/power-on
-  agentUrl: 'https://pc.hajimammad.com',
+  agentUrl: 'https://pcagent.hajimammad.com',
   agentKey: '',
   windowsUsername: 'aliye',
   windowsPassword: '',
