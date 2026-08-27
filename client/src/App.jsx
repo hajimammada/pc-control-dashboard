@@ -34,7 +34,7 @@ import {
   launchAntigravityApp 
 } from './utils/api';
 
-const APP_VERSION = 'v2.0.3';
+const APP_VERSION = 'v2.0.4';
 
 export default function App() {
   const [settings, setSettings] = useState(() => getStoredSettings());
