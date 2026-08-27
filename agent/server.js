@@ -4,19 +4,57 @@ const os = require('os');
 const { exec, execFile } = require('child_process');
 const path = require('path');
 const fs = require('fs');
+const crypto = require('crypto');
+const rateLimit = require('express-rate-limit');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const app = express();
 const PORT = process.env.PORT || 48880;
 const AGENT_KEY = process.env.AGENT_KEY || '';
 
-// Middleware
+// Security Headers & Payload Size Limits
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  next();
+});
+
 app.use(cors({
   origin: '*',
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'x-agent-key']
 }));
-app.use(express.json());
+app.use(express.json({ limit: '100kb' }));
+
+// Global Rate Limiter (Throttles brute-force or spamming)
+const globalLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 120, // max 120 requests per minute per IP
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, error: 'Too many requests. Please slow down.' }
+});
+app.use('/api/', globalLimiter);
+
+// Strict Rate Limiter for Power & Terminal execution
+const sensitiveActionLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 40, // max 40 commands per minute
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, error: 'Rate limit exceeded for sensitive operations.' }
+});
+app.use('/api/power/', sensitiveActionLimiter);
+app.use('/api/terminal/', sensitiveActionLimiter);
+
+// Timing-Safe Key Comparison Helper (Prevents timing attacks)
+function safeCompare(a, b) {
+  if (!a || !b || typeof a !== 'string' || typeof b !== 'string') return false;
+  const hashA = crypto.createHash('sha256').update(a).digest();
+  const hashB = crypto.createHash('sha256').update(b).digest();
+  return crypto.timingSafeEqual(hashA, hashB);
+}
 
 // Auth verification middleware
 function authenticate(req, res, next) {
@@ -28,8 +66,8 @@ function authenticate(req, res, next) {
 
   const reqKey = token || req.query.key;
 
-  // Key must be configured and must match exactly
-  if (!AGENT_KEY || !reqKey || reqKey !== AGENT_KEY) {
+  // Key must be configured and match securely
+  if (!AGENT_KEY || !reqKey || !safeCompare(reqKey, AGENT_KEY)) {
     return res.status(401).json({ 
       success: false, 
       error: 'Unauthorized: Invalid or missing Agent Secret Key.' 
