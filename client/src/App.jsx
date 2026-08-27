@@ -1,26 +1,22 @@
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Power, 
   Moon, 
   RotateCcw, 
   Lock, 
-  Server, 
   Zap, 
   Monitor, 
   Bot, 
   Settings, 
-  Clock, 
   Cpu, 
   HardDrive, 
   ArrowUpRight, 
-  ExternalLink,
-  Shield, 
-  CheckCircle2, 
-  AlertCircle,
-  Wifi,
-  Sparkles,
-  Terminal,
-  Activity
+  ExternalLink, 
+  Sparkles, 
+  Terminal, 
+  Activity,
+  ShieldCheck,
+  Radio
 } from 'lucide-react';
 
 import ConfirmPowerModal from './components/ConfirmPowerModal';
@@ -33,9 +29,9 @@ import {
   saveStoredSettings, 
   fetchAgentStatus, 
   triggerMacroDroid, 
-  executePowerAction,
-  unlockWindowsSession,
-  launchAntigravityApp
+  executePowerAction, 
+  unlockWindowsSession, 
+  launchAntigravityApp 
 } from './utils/api';
 
 export default function App() {
@@ -193,7 +189,7 @@ export default function App() {
       {/* Main Container */}
       <main className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 flex flex-col justify-center">
         
-        {/* Top Header & Live Status */}
+        {/* TOP HEADER & STATUS BAR */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8 pb-6 border-b border-slate-800/80">
           
           {/* Left: Brand & Status */}
@@ -233,7 +229,7 @@ export default function App() {
           </div>
 
           {/* Right: Clock & Settings */}
-          <div className="flex items-center gap-3 sm:gap-4">
+          <div className="flex items-center gap-5">
             <div className="text-right">
               <div className="font-mono text-3xl font-bold tracking-wider text-slate-100 drop-shadow">
                 {formattedTime}
@@ -242,15 +238,6 @@ export default function App() {
                 {formattedDate}
               </div>
             </div>
-
-            <button
-              onClick={() => setIsTerminalOpen(true)}
-              className="p-3.5 rounded-2xl bg-[#111726] hover:bg-cyan-950/60 text-slate-300 hover:text-cyan-400 border border-slate-700/80 hover:border-cyan-500/40 transition-all duration-200 shadow-lg group flex items-center gap-2 cursor-pointer"
-              title="Open Remote PowerShell Console"
-            >
-              <Terminal className="w-5 h-5 group-hover:scale-110 transition-transform" />
-              <span className="hidden sm:inline text-xs font-bold text-slate-200 font-mono">Terminal</span>
-            </button>
 
             <button
               onClick={() => setIsSettingsOpen(true)}
@@ -263,193 +250,163 @@ export default function App() {
 
         </div>
 
-        {/* SECTION 1: POWER CONTROLS GRID */}
+        {/* SECTION 1: SYSTEM POWER MANAGEMENT (5 EQUAL-SIZED TILES) */}
         <div className="mb-8">
           
           <div className="flex items-center justify-between mb-4 px-1">
             <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
               <Zap className="w-4 h-4 text-cyan-400" />
-              Power Management (From Anywhere)
+              System Power Management
             </h2>
             <span className="text-xs text-slate-500">
-              MacroDroid Webhook & Remote Daemon
+              Instant Control (Before & After Unlock)
             </span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
+          {/* Equal-sized 5-button responsive grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
             
-            {/* MacroDroid Power ON Card (5 cols) */}
-            <div className="md:col-span-5 relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#101728] via-[#141e33] to-[#0d1424] border border-cyan-500/30 hover:border-cyan-500/60 p-6 shadow-2xl flex flex-col justify-between group transition-all duration-300">
-              <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-cyan-500/15 rounded-full blur-3xl pointer-events-none group-hover:bg-cyan-500/25 transition-all duration-500"></div>
-
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2.5">
-                    <div className="p-2.5 rounded-2xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
-                      <Zap className="w-6 h-6" />
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-white text-base">Power ON PC</h3>
-                      <p className="text-xs text-slate-400">MacroDroid Webhook Trigger</p>
-                    </div>
-                  </div>
-
-                  <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full border ${
-                    settings.macrodroidWebhookUrl 
-                      ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' 
-                      : 'bg-amber-500/10 text-amber-400 border-amber-500/30'
-                  }`}>
-                    {settings.macrodroidWebhookUrl ? 'Ready' : 'Setup Required'}
-                  </span>
+            {/* 1. Turn ON (Wake-on-LAN) Tile */}
+            <button
+              onClick={handleTriggerMacroDroid}
+              disabled={isTriggeringMacroDroid}
+              className="relative p-5 rounded-3xl bg-[#111728]/95 hover:bg-emerald-950/60 border border-emerald-500/30 hover:border-emerald-500/60 shadow-lg text-left transition-all duration-200 group flex flex-col justify-between cursor-pointer min-h-[170px]"
+            >
+              <div className="flex items-center justify-between w-full mb-3">
+                <div className="p-3 rounded-2xl bg-emerald-500/10 text-emerald-400 group-hover:scale-110 transition-transform">
+                  <Power className={`w-6 h-6 ${isTriggeringMacroDroid ? 'animate-spin' : ''}`} />
                 </div>
-
-                <p className="text-xs text-slate-300 leading-relaxed mb-6">
-                  Wakes up your PC remotely by dispatching your custom MacroDroid webhook signal to your automation phone / smart plug.
+                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                  Wake-on-LAN
+                </span>
+              </div>
+              <div>
+                <h4 className="font-bold text-white text-base group-hover:text-emerald-300 transition-colors">
+                  {isTriggeringMacroDroid ? 'Waking PC...' : 'Turn ON PC'}
+                </h4>
+                <p className="text-xs text-slate-400 mt-1 leading-snug">
+                  MacroDroid power signal
                 </p>
               </div>
+            </button>
 
-              <div>
-                <button
-                  onClick={handleTriggerMacroDroid}
-                  disabled={isTriggeringMacroDroid}
-                  className="relative w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-cyan-500 via-blue-600 to-cyan-400 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-black text-sm tracking-wider uppercase shadow-xl shadow-cyan-500/30 hover:shadow-cyan-500/50 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-3 overflow-hidden group/btn disabled:opacity-75"
-                >
-                  <Power className={`w-5 h-5 ${isTriggeringMacroDroid ? 'animate-spin' : 'animate-pulse'}`} />
-                  <span>{isTriggeringMacroDroid ? 'Triggering Webhook...' : '⚡ Turn PC ON'}</span>
-                </button>
-
-                <div className="flex items-center justify-between text-[11px] text-slate-400 mt-3 px-1">
-                  <span>Direct Webhook Dispatch</span>
-                  <button onClick={() => setIsSettingsOpen(true)} className="text-cyan-400 hover:underline">
-                    Edit URL
-                  </button>
+            {/* 2. Sleep PC Tile */}
+            <button
+              onClick={() => handleRequestPowerAction('sleep')}
+              disabled={!isAgentOnline}
+              className="relative p-5 rounded-3xl bg-[#111728]/95 hover:bg-indigo-950/60 border border-indigo-500/30 hover:border-indigo-500/60 shadow-lg text-left transition-all duration-200 group flex flex-col justify-between disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer min-h-[170px]"
+            >
+              <div className="flex items-center justify-between w-full mb-3">
+                <div className="p-3 rounded-2xl bg-indigo-500/10 text-indigo-400 group-hover:scale-110 transition-transform">
+                  <Moon className="w-6 h-6" />
                 </div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full border border-indigo-500/20">
+                  Standby
+                </span>
               </div>
+              <div>
+                <h4 className="font-bold text-white text-base group-hover:text-indigo-300 transition-colors">
+                  Sleep Mode
+                </h4>
+                <p className="text-xs text-slate-400 mt-1 leading-snug">
+                  Low-power ACPI sleep
+                </p>
+              </div>
+            </button>
 
-            </div>
+            {/* 3. Restart PC Tile */}
+            <button
+              onClick={() => handleRequestPowerAction('restart')}
+              disabled={!isAgentOnline}
+              className="relative p-5 rounded-3xl bg-[#111728]/95 hover:bg-amber-950/60 border border-amber-500/30 hover:border-amber-500/60 shadow-lg text-left transition-all duration-200 group flex flex-col justify-between disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer min-h-[170px]"
+            >
+              <div className="flex items-center justify-between w-full mb-3">
+                <div className="p-3 rounded-2xl bg-amber-500/10 text-amber-400 group-hover:rotate-180 transition-transform duration-500">
+                  <RotateCcw className="w-6 h-6" />
+                </div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
+                  Reboot
+                </span>
+              </div>
+              <div>
+                <h4 className="font-bold text-white text-base group-hover:text-amber-300 transition-colors">
+                  Restart PC
+                </h4>
+                <p className="text-xs text-slate-400 mt-1 leading-snug">
+                  Fast system restart
+                </p>
+              </div>
+            </button>
 
-            {/* Remote Power Actions Grid (7 cols) */}
-            <div className="md:col-span-7 grid grid-cols-2 gap-3.5">
-              
-              {/* Sleep Button */}
-              <button
-                onClick={() => handleRequestPowerAction('sleep')}
-                disabled={!isAgentOnline}
-                className="relative p-5 rounded-3xl bg-[#111728]/90 hover:bg-indigo-950/60 border border-indigo-500/20 hover:border-indigo-500/50 shadow-lg text-left transition-all duration-200 group flex flex-col justify-between disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                <div className="flex items-center justify-between mb-3">
-                  <div className="p-3 rounded-2xl bg-indigo-500/10 text-indigo-400 group-hover:scale-110 transition-transform">
-                    <Moon className="w-6 h-6" />
-                  </div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full">
-                    Suspend
-                  </span>
+            {/* 4. Shut Down PC Tile */}
+            <button
+              onClick={() => handleRequestPowerAction('shutdown')}
+              disabled={!isAgentOnline}
+              className="relative p-5 rounded-3xl bg-[#111728]/95 hover:bg-rose-950/60 border border-rose-500/30 hover:border-rose-500/60 shadow-lg text-left transition-all duration-200 group flex flex-col justify-between disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer min-h-[170px]"
+            >
+              <div className="flex items-center justify-between w-full mb-3">
+                <div className="p-3 rounded-2xl bg-rose-500/10 text-rose-400 group-hover:scale-110 transition-transform">
+                  <Power className="w-6 h-6" />
                 </div>
-                <div>
-                  <h4 className="font-bold text-white text-base group-hover:text-indigo-300 transition-colors">
-                    Sleep PC
-                  </h4>
-                  <p className="text-xs text-slate-400 mt-1">
-                    Put Windows PC into low-power sleep state
-                  </p>
-                </div>
-              </button>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-full border border-rose-500/20">
+                  Power Off
+                </span>
+              </div>
+              <div>
+                <h4 className="font-bold text-white text-base group-hover:text-rose-300 transition-colors">
+                  Shut Down
+                </h4>
+                <p className="text-xs text-slate-400 mt-1 leading-snug">
+                  Complete hardware shutdown
+                </p>
+              </div>
+            </button>
 
-              {/* Restart Button */}
-              <button
-                onClick={() => handleRequestPowerAction('restart')}
-                disabled={!isAgentOnline}
-                className="relative p-5 rounded-3xl bg-[#111728]/90 hover:bg-amber-950/60 border border-amber-500/20 hover:border-amber-500/50 shadow-lg text-left transition-all duration-200 group flex flex-col justify-between disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                <div className="flex items-center justify-between mb-3">
-                  <div className="p-3 rounded-2xl bg-amber-500/10 text-amber-400 group-hover:rotate-180 transition-transform duration-500">
-                    <RotateCcw className="w-6 h-6" />
-                  </div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full">
-                    Reboot
-                  </span>
+            {/* 5. Lock Workstation Tile */}
+            <button
+              onClick={() => handleRequestPowerAction('lock')}
+              disabled={!isAgentOnline}
+              className="relative p-5 rounded-3xl bg-[#111728]/95 hover:bg-cyan-950/60 border border-cyan-500/30 hover:border-cyan-500/60 shadow-lg text-left transition-all duration-200 group flex flex-col justify-between disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer min-h-[170px]"
+            >
+              <div className="flex items-center justify-between w-full mb-3">
+                <div className="p-3 rounded-2xl bg-cyan-500/10 text-cyan-400 group-hover:scale-110 transition-transform">
+                  <Lock className="w-6 h-6" />
                 </div>
-                <div>
-                  <h4 className="font-bold text-white text-base group-hover:text-amber-300 transition-colors">
-                    Restart PC
-                  </h4>
-                  <p className="text-xs text-slate-400 mt-1">
-                    Safe restart with countdown protection
-                  </p>
-                </div>
-              </button>
-
-              {/* Shut Down Button */}
-              <button
-                onClick={() => handleRequestPowerAction('shutdown')}
-                disabled={!isAgentOnline}
-                className="relative p-5 rounded-3xl bg-[#111728]/90 hover:bg-rose-950/60 border border-rose-500/20 hover:border-rose-500/50 shadow-lg text-left transition-all duration-200 group flex flex-col justify-between disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                <div className="flex items-center justify-between mb-3">
-                  <div className="p-3 rounded-2xl bg-rose-500/10 text-rose-400 group-hover:scale-110 transition-transform">
-                    <Power className="w-6 h-6" />
-                  </div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-full">
-                    Power Off
-                  </span>
-                </div>
-                <div>
-                  <h4 className="font-bold text-white text-base group-hover:text-rose-300 transition-colors">
-                    Shut Down PC
-                  </h4>
-                  <p className="text-xs text-slate-400 mt-1">
-                    Completely power off your workstation
-                  </p>
-                </div>
-              </button>
-
-              {/* Lock Workstation Button */}
-              <button
-                onClick={() => handleRequestPowerAction('lock')}
-                disabled={!isAgentOnline}
-                className="relative p-5 rounded-3xl bg-[#111728]/90 hover:bg-cyan-950/60 border border-cyan-500/20 hover:border-cyan-500/50 shadow-lg text-left transition-all duration-200 group flex flex-col justify-between disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                <div className="flex items-center justify-between mb-3">
-                  <div className="p-3 rounded-2xl bg-cyan-500/10 text-cyan-400 group-hover:scale-110 transition-transform">
-                    <Lock className="w-6 h-6" />
-                  </div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded-full">
-                    Security
-                  </span>
-                </div>
-                <div>
-                  <h4 className="font-bold text-white text-base group-hover:text-cyan-300 transition-colors">
-                    Lock Workstation
-                  </h4>
-                  <p className="text-xs text-slate-400 mt-1">
-                    Lock active Windows user desktop
-                  </p>
-                </div>
-              </button>
-
-            </div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded-full border border-cyan-500/20">
+                  Security
+                </span>
+              </div>
+              <div>
+                <h4 className="font-bold text-white text-base group-hover:text-cyan-300 transition-colors">
+                  Lock Screen
+                </h4>
+                <p className="text-xs text-slate-400 mt-1 leading-snug">
+                  Lock active desktop session
+                </p>
+              </div>
+            </button>
 
           </div>
 
         </div>
 
-        {/* SECTION 2: REMOTE PC ACCESS GATEWAY */}
+        {/* SECTION 2: REMOTE ACCESS GATEWAY (3 EQUAL-SIZED CYBER-GLASS CARDS) */}
         <div className="mb-8">
           
           <div className="flex items-center justify-between mb-4 px-1">
             <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
               <Monitor className="w-4 h-4 text-cyan-400" />
-              Remote PC Access & Antigravity
+              Remote Access Gateway
             </h2>
             <span className="text-xs text-slate-500">
-              One-Click Remote Connection
+              Multi-Protocol Remote Connections
             </span>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
             
             {/* 1. Chrome Remote Desktop Card */}
-            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#12192b]/95 to-[#0e1424]/95 border border-blue-500/30 hover:border-blue-500/60 p-6 shadow-xl group transition-all duration-300 flex flex-col justify-between">
+            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#12192b]/95 to-[#0e1424]/95 border border-blue-500/30 hover:border-blue-500/60 p-6 shadow-xl group transition-all duration-300 flex flex-col justify-between min-h-[260px]">
               
               <div className="flex items-start gap-4 mb-6">
                 <div className="w-14 h-14 rounded-2xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400 group-hover:scale-105 group-hover:bg-blue-500/20 transition-all duration-300 shrink-0">
@@ -459,14 +416,14 @@ export default function App() {
                 <div>
                   <div className="flex items-center gap-2">
                     <h3 className="font-bold text-white text-lg group-hover:text-blue-300 transition-colors">
-                      Chrome Remote Desktop
+                      Chrome Remote
                     </h3>
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">
-                      Google
+                      Screen GUI
                     </span>
                   </div>
                   <p className="text-xs text-slate-300 mt-1.5 leading-relaxed">
-                    Access and control your PC's desktop, files, and multi-monitor screen directly from Chrome.
+                    Full interactive desktop control, multi-monitor display, and file transfer directly in Chrome.
                   </p>
                 </div>
               </div>
@@ -477,50 +434,50 @@ export default function App() {
                 rel="noopener noreferrer"
                 className="w-full py-3.5 px-5 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-blue-600/30 hover:shadow-blue-600/50 transition-all duration-200"
               >
-                <span>Connect to PC via Chrome Remote</span>
+                <span>Launch Screen Control</span>
                 <ArrowUpRight className="w-4 h-4" />
               </a>
 
             </div>
 
-            {/* 2. Google Antigravity Web Interface Card */}
-            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#12192b]/95 to-[#0e1424]/95 border border-cyan-500/30 hover:border-cyan-500/60 p-6 shadow-xl group transition-all duration-300 flex flex-col justify-between">
+            {/* 2. Google Antigravity Card */}
+            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#12192b]/95 to-[#0e1424]/95 border border-purple-500/30 hover:border-purple-500/60 p-6 shadow-xl group transition-all duration-300 flex flex-col justify-between min-h-[260px]">
               
-              <div className="flex items-start gap-4 mb-6">
-                <div className="w-14 h-14 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 group-hover:scale-105 group-hover:bg-cyan-500/20 transition-all duration-300 shrink-0">
+              <div className="flex items-start gap-4 mb-4">
+                <div className="w-14 h-14 rounded-2xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 group-hover:scale-105 group-hover:bg-purple-500/20 transition-all duration-300 shrink-0">
                   <Bot className="w-7 h-7" />
                 </div>
 
                 <div>
                   <div className="flex items-center gap-2">
-                    <h3 className="font-bold text-white text-lg group-hover:text-cyan-300 transition-colors">
-                      Google Antigravity
+                    <h3 className="font-bold text-white text-lg group-hover:text-purple-300 transition-colors">
+                      Antigravity IDE
                     </h3>
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
-                      On-Demand Unlock
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                      AI Workspace
                     </span>
                   </div>
                   <p className="text-xs text-slate-300 mt-1.5 leading-relaxed">
-                    Unlocks your Windows session on-demand (single-use) and launches your Antigravity IDE and agentic workspace.
+                    On-demand single-use Windows unlock and automated launch of your agentic coding environment.
                   </p>
                 </div>
               </div>
 
-              <div className="space-y-2.5">
+              <div className="space-y-2">
                 <button
                   onClick={handleUnlockAndOpenAntigravity}
                   disabled={!isAgentOnline || isUnlockingSession}
-                  className="w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-slate-950 font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-cyan-500/30 hover:shadow-cyan-500/50 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                  className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-purple-600 to-cyan-500 hover:from-purple-500 hover:to-cyan-400 text-slate-950 font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
                 >
                   <Sparkles className="w-4 h-4 text-slate-950" />
-                  <span>{isUnlockingSession ? 'Unlocking Windows Session...' : 'Unlock PC & Start Antigravity'}</span>
+                  <span>{isUnlockingSession ? 'Unlocking Session...' : 'Unlock PC & Start Antigravity'}</span>
                 </button>
 
                 <a
                   href={antigravityUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full py-2.5 px-4 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white font-medium text-[11px] flex items-center justify-center gap-1.5 border border-white/10 transition-all duration-200"
+                  className="w-full py-2 px-3 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white font-medium text-[11px] flex items-center justify-center gap-1.5 border border-white/10 transition-all duration-200"
                 >
                   <Terminal className="w-3.5 h-3.5" />
                   <span>Open Antigravity Web Link</span>
@@ -531,7 +488,7 @@ export default function App() {
             </div>
 
             {/* 3. Remote PowerShell Terminal Card */}
-            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#12192b]/95 to-[#0e1424]/95 border border-emerald-500/30 hover:border-emerald-500/60 p-6 shadow-xl group transition-all duration-300 flex flex-col justify-between">
+            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#12192b]/95 to-[#0e1424]/95 border border-emerald-500/30 hover:border-emerald-500/60 p-6 shadow-xl group transition-all duration-300 flex flex-col justify-between min-h-[260px]">
               
               <div className="flex items-start gap-4 mb-6">
                 <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 group-hover:scale-105 group-hover:bg-emerald-500/20 transition-all duration-300 shrink-0">
@@ -548,7 +505,7 @@ export default function App() {
                     </span>
                   </div>
                   <p className="text-xs text-slate-300 mt-1.5 leading-relaxed">
-                    Execute administrative PowerShell commands, inspect running processes, and manage your PC from any browser.
+                    Interactive command line console to run PowerShell scripts, check processes, and manage services.
                   </p>
                 </div>
               </div>
@@ -559,7 +516,7 @@ export default function App() {
                 className="w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
               >
                 <Terminal className="w-4 h-4 text-slate-950" />
-                <span>Open Remote PowerShell Console</span>
+                <span>Open PowerShell Console</span>
               </button>
 
             </div>
@@ -637,7 +594,7 @@ export default function App() {
           </div>
 
           <div className="flex items-center gap-3 text-[11px]">
-            <button onClick={() => setIsSettingsOpen(true)} className="hover:text-cyan-300 transition-colors">
+            <button onClick={() => setIsSettingsOpen(true)} className="hover:text-cyan-300 transition-colors cursor-pointer">
               Settings & Remote Tunnels
             </button>
           </div>
