@@ -33,7 +33,7 @@ import {
   launchAntigravityApp 
 } from './utils/api';
 
-const APP_VERSION = 'v2.1.1';
+const APP_VERSION = 'v2.1.2';
 
 export default function App() {
   const [settings, setSettings] = useState(() => getStoredSettings());
@@ -404,15 +404,25 @@ export default function App() {
                 </div>
               </div>
 
-              <a
-                href={remoteDesktopUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full py-3.5 px-5 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-blue-600/30 hover:shadow-blue-600/50 transition-all duration-200"
-              >
-                <span>Launch Screen Control</span>
-                <ArrowUpRight className="w-4 h-4" />
-              </a>
+              {isAgentOnline ? (
+                <a
+                  href={remoteDesktopUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-3.5 px-5 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-blue-600/30 hover:shadow-blue-600/50 transition-all duration-200 cursor-pointer"
+                >
+                  <span>Launch Screen Control</span>
+                  <ArrowUpRight className="w-4 h-4" />
+                </a>
+              ) : (
+                <button
+                  disabled
+                  className="w-full py-3.5 px-5 rounded-2xl bg-blue-600/30 text-slate-400 font-bold text-xs flex items-center justify-center gap-2 opacity-40 cursor-not-allowed border border-blue-500/20"
+                >
+                  <span>Launch Screen Control</span>
+                  <ArrowUpRight className="w-4 h-4 text-slate-400" />
+                </button>
+              )}
 
             </div>
 
@@ -439,15 +449,25 @@ export default function App() {
                 </div>
               </div>
 
-              <a
-                href={antigravityUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r from-purple-600 to-cyan-500 hover:from-purple-500 hover:to-cyan-400 text-slate-950 font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 transition-all duration-200"
-              >
-                <span>Launch Antigravity</span>
-                <ArrowUpRight className="w-4 h-4" />
-              </a>
+              {isAgentOnline ? (
+                <a
+                  href={antigravityUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r from-purple-600 to-cyan-500 hover:from-purple-500 hover:to-cyan-400 text-slate-950 font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 transition-all duration-200 cursor-pointer"
+                >
+                  <span>Launch Antigravity</span>
+                  <ArrowUpRight className="w-4 h-4" />
+                </a>
+              ) : (
+                <button
+                  disabled
+                  className="w-full py-3.5 px-5 rounded-2xl bg-purple-600/30 text-slate-400 font-bold text-xs flex items-center justify-center gap-2 opacity-40 cursor-not-allowed border border-purple-500/20"
+                >
+                  <span>Launch Antigravity</span>
+                  <ArrowUpRight className="w-4 h-4 text-slate-400" />
+                </button>
+              )}
 
             </div>
 
