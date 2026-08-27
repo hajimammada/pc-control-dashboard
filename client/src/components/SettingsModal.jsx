@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { 
   X, 
   Settings, 
@@ -8,9 +8,13 @@ import {
   Monitor, 
   Bot, 
   CheckCircle2, 
-  ExternalLink 
+  ExternalLink,
+  FileText,
+  Upload,
+  Download,
+  FolderOpen
 } from 'lucide-react';
-import { triggerMacroDroid, fetchAgentStatus } from '../utils/api';
+import { triggerMacroDroid, fetchAgentStatus, parseSettingsFile, exportSettingsFile } from '../utils/api';
 
 export default function SettingsModal({ 
   isOpen, 
@@ -24,11 +28,46 @@ export default function SettingsModal({
   const [testingAgent, setTestingAgent] = useState(false);
   const [agentTestResult, setAgentTestResult] = useState(null);
   const [activeTab, setActiveTab] = useState('general');
+  const fileInputRef = useRef(null);
 
   if (!isOpen) return null;
 
   const handleChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleFileUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const text = event.target?.result;
+        const parsed = parseSettingsFile(text);
+        
+        setFormData(prev => ({ ...prev, ...parsed }));
+        
+        const count = Object.keys(parsed).length;
+        onShowToast(`Successfully imported ${count} settings from ${file.name}!`, 'success');
+      } catch (err) {
+        onShowToast(err.message || 'Failed to parse configuration file.', 'error');
+      } finally {
+        if (fileInputRef.current) fileInputRef.current.value = '';
+      }
+    };
+
+    reader.onerror = () => {
+      onShowToast('Error reading the selected file.', 'error');
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    };
+
+    reader.readAsText(file);
+  };
+
+  const handleExport = () => {
+    exportSettingsFile(formData);
+    onShowToast('Settings exported to nexus-secrets.json!', 'success');
   };
 
   const handleSave = (e) => {
@@ -102,8 +141,49 @@ export default function SettingsModal({
           </button>
         </div>
 
+        {/* Quick File Import / Export Bar */}
+        <div className="p-3.5 mx-6 mt-4 rounded-2xl bg-gradient-to-r from-[#141d30] via-[#162138] to-[#12192a] border border-cyan-500/30 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-lg">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+              <FolderOpen className="w-4 h-4" />
+            </div>
+            <div>
+              <h4 className="text-xs font-bold text-white">Import from SECRETS.md / File</h4>
+              <p className="text-[11px] text-slate-400">Select your secrets file to auto-fill all textboxes</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              onChange={handleFileUpload} 
+              accept=".md,.json,.txt,.env" 
+              className="hidden" 
+            />
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="flex-1 sm:flex-none px-3.5 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 shadow-md shadow-cyan-500/20 transition-all cursor-pointer"
+              title="Select your local SECRETS.md or JSON config"
+            >
+              <Upload className="w-3.5 h-3.5" />
+              <span>Select File</span>
+            </button>
+            <button
+              type="button"
+              onClick={handleExport}
+              className="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white border border-white/10 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+              title="Backup current settings to a JSON file"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Export</span>
+            </button>
+          </div>
+        </div>
+
         {/* Tab Navigation */}
-        <div className="flex items-center gap-2 px-6 pt-3 border-b border-slate-800 bg-[#0e1422] text-xs font-semibold">
+        <div className="flex items-center gap-2 px-6 pt-3 mt-1 border-b border-slate-800 bg-[#0e1422] text-xs font-semibold">
           <button
             onClick={() => setActiveTab('general')}
             className={`pb-2.5 px-3 border-b-2 transition-colors cursor-pointer ${activeTab === 'general' ? 'border-cyan-400 text-cyan-300' : 'border-transparent text-slate-400 hover:text-slate-200'}`}

@@ -34,6 +34,93 @@ export function saveStoredSettings(settings) {
   }
 }
 
+// Smart Configuration File Parser (Supports JSON, Markdown, ENV, and Text)
+export function parseSettingsFile(rawText) {
+  if (!rawText || typeof rawText !== 'string') {
+    throw new Error('Selected file is empty or invalid.');
+  }
+
+  const result = {};
+
+  // 1. Try parsing as JSON first
+  const trimmed = rawText.trim();
+  if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
+    try {
+      const parsed = JSON.parse(trimmed);
+      if (parsed.agentUrl || parsed.AGENT_URL || parsed.agent_url) {
+        result.agentUrl = parsed.agentUrl || parsed.AGENT_URL || parsed.agent_url || '';
+      }
+      if (parsed.agentKey || parsed.AGENT_KEY || parsed.agent_key) {
+        result.agentKey = parsed.agentKey || parsed.AGENT_KEY || parsed.agent_key || '';
+      }
+      if (parsed.macrodroidWebhookUrl || parsed.MACRODROID_URL || parsed.webhookUrl || parsed.webhook) {
+        result.macrodroidWebhookUrl = parsed.macrodroidWebhookUrl || parsed.MACRODROID_URL || parsed.webhookUrl || parsed.webhook || '';
+      }
+      if (parsed.remoteDesktopUrl || parsed.REMOTE_DESKTOP_URL || parsed.chromeRdpUrl) {
+        result.remoteDesktopUrl = parsed.remoteDesktopUrl || parsed.REMOTE_DESKTOP_URL || parsed.chromeRdpUrl || '';
+      }
+      if (parsed.antigravityUrl || parsed.ANTIGRAVITY_URL || parsed.antigravity) {
+        result.antigravityUrl = parsed.antigravityUrl || parsed.ANTIGRAVITY_URL || parsed.antigravity || '';
+      }
+      return result;
+    } catch (e) {
+      // Fall through to regex text parser
+    }
+  }
+
+  // 2. Parse as Markdown / Text / ENV file using regex
+  const cleanStr = (val) => val ? val.replace(/[`"']/g, '').trim() : '';
+
+  // Agent URL (e.g. https://pcagent.yourdomain.com)
+  const agentUrlMatch = rawText.match(/(?:Agent\s*URL|AGENT_URL|PC_AGENT_URL|Agent\s*Endpoint)[\s*:=]+[`"']?(https?:\/\/[^\s`"'\)]+)/i);
+  if (agentUrlMatch) result.agentUrl = cleanStr(agentUrlMatch[1]);
+
+  // Agent Key (e.g. 40-char token)
+  const agentKeyMatch = rawText.match(/(?:Agent\s*(?:Secret\s*)?Key|AGENT_KEY|AGENT_SECRET_KEY|SECRET_KEY|Token)[\s*:=]+[`"']?([a-zA-Z0-9_-]{20,80})/i);
+  if (agentKeyMatch) result.agentKey = cleanStr(agentKeyMatch[1]);
+
+  // MacroDroid Webhook (e.g. https://trigger.macrodroid.com/...)
+  const macrodroidMatch = rawText.match(/(?:MacroDroid(?:\s*WOL)?(?:\s*Webhook)?|WOL|Wake|Webhook|Power[-_\s]*ON)[\s*:=]+[`"']?(https?:\/\/[^\s`"'\)]+)/i);
+  if (macrodroidMatch) result.macrodroidWebhookUrl = cleanStr(macrodroidMatch[1]);
+
+  // Chrome Remote Desktop URL
+  const remoteDesktopMatch = rawText.match(/(?:Chrome\s*Remote(?:\s*Desktop)?(?:\s*URL)?|Remote\s*Desktop|CHROME_RDP)[\s*:=]+[`"']?(https?:\/\/[^\s`"'\)]+)/i);
+  if (remoteDesktopMatch) result.remoteDesktopUrl = cleanStr(remoteDesktopMatch[1]);
+
+  // Antigravity URL
+  const antigravityMatch = rawText.match(/(?:Antigravity(?:\s*URL)?)[\s*:=]+[`"']?(https?:\/\/[^\s`"'\)]+)/i);
+  if (antigravityMatch) result.antigravityUrl = cleanStr(antigravityMatch[1]);
+
+  const extractedCount = Object.keys(result).length;
+  if (extractedCount === 0) {
+    throw new Error('No recognized configuration credentials found in this file. Please check file format.');
+  }
+
+  return result;
+}
+
+// Export Settings File Helper
+export function exportSettingsFile(settings) {
+  const exportData = {
+    agentUrl: settings.agentUrl || '',
+    agentKey: settings.agentKey || '',
+    macrodroidWebhookUrl: settings.macrodroidWebhookUrl || '',
+    remoteDesktopUrl: settings.remoteDesktopUrl || 'https://remotedesktop.google.com/access',
+    antigravityUrl: settings.antigravityUrl || 'https://antigravity.google.com',
+    exportedAt: new Date().toISOString()
+  };
+
+  const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'nexus-secrets.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
 // Trigger MacroDroid Webhook
 export async function triggerMacroDroid(webhookUrl, agentUrl = null) {
   if (!webhookUrl || !webhookUrl.trim()) {
