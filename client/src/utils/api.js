@@ -1,15 +1,13 @@
 // Nexus Dashboard API & Storage Utilities
 
-const SETTINGS_KEY = 'nexus_dashboard_settings_v3';
+const SETTINGS_KEY = 'nexus_dashboard_settings_v4';
 
 export const DEFAULT_SETTINGS = {
   macrodroidWebhookUrl: '', // e.g. https://trigger.macrodroid.com/xxxx/power-on
-  agentUrl: 'https://pcagent.hajimammad.com',
+  agentUrl: '',
   agentKey: '',
-  windowsUsername: 'aliye',
-  windowsPassword: '',
   remoteDesktopUrl: 'https://remotedesktop.google.com/access',
-  antigravityUrl: 'https://pc.hajimammad.com',
+  antigravityUrl: '',
   autoRefreshStats: true,
   refreshIntervalMs: 4000
 };

@@ -174,7 +174,7 @@ export default function SettingsModal({
                   </span>
                 </div>
                 <p className="text-xs text-slate-400 mb-3 leading-relaxed">
-                  Remote Endpoint: <code className="text-cyan-300 font-mono">https://pcagent.hajimammad.com</code> (or <code className="text-slate-300">http://localhost:48880</code> when on the same PC).
+                  Remote Endpoint: e.g. <code className="text-cyan-300 font-mono">https://your-tunnel.domain.com</code> (or <code className="text-slate-300">http://localhost:48880</code> when local).
                 </p>
                 
                 <div className="space-y-3">
@@ -183,14 +183,14 @@ export default function SettingsModal({
                       type="text"
                       value={formData.agentUrl}
                       onChange={(e) => handleChange('agentUrl', e.target.value)}
-                      placeholder="https://pcagent.hajimammad.com"
+                      placeholder="https://your-tunnel.domain.com"
                       className="flex-1 bg-[#101726] border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 font-mono"
                     />
                     <button
                       type="button"
                       onClick={handleTestAgent}
                       disabled={testingAgent}
-                      className="px-4 py-2.5 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 text-xs font-bold border border-purple-500/40 transition-colors whitespace-nowrap"
+                      className="px-4 py-2.5 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 text-xs font-bold border border-purple-500/40 transition-colors whitespace-nowrap cursor-pointer"
                     >
                       {testingAgent ? 'Testing...' : 'Test Ping'}
                     </button>
@@ -213,50 +213,6 @@ export default function SettingsModal({
                       onChange={(e) => handleChange('agentKey', e.target.value)}
                       placeholder="Paste your Agent Secret Key..."
                       className="w-full bg-[#101726] border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 font-mono"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Windows On-Demand Auto-Logon Credentials */}
-              <div className="p-4 rounded-2xl bg-[#141c2e] border border-cyan-500/30">
-                <div className="flex items-center justify-between mb-2">
-                  <label className="text-xs font-bold text-white flex items-center gap-2">
-                    <Shield className="w-4 h-4 text-cyan-400" />
-                    Windows Logon Credentials (On-Demand Auto-Logon)
-                  </label>
-                  <span className="text-[10px] uppercase font-bold text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">
-                    Single-Use Unlock
-                  </span>
-                </div>
-                <p className="text-xs text-slate-400 mb-3 leading-relaxed">
-                  Saved only in your browser. Used securely to unlock your Windows session and launch Antigravity when you click the unlock button.
-                </p>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-[11px] font-semibold text-slate-400 mb-1">
-                      Windows Username
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.windowsUsername || ''}
-                      onChange={(e) => handleChange('windowsUsername', e.target.value)}
-                      placeholder="aliye"
-                      className="w-full bg-[#101726] border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 font-mono"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-[11px] font-semibold text-slate-400 mb-1">
-                      Windows Password
-                    </label>
-                    <input
-                      type="password"
-                      value={formData.windowsPassword || ''}
-                      onChange={(e) => handleChange('windowsPassword', e.target.value)}
-                      placeholder="Your Windows Password"
-                      className="w-full bg-[#101726] border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 font-mono"
                     />
                   </div>
                 </div>

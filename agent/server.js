@@ -214,62 +214,6 @@ app.get('/api/session/status', authenticate, (req, res) => {
   });
 });
 
-// Session: Dynamic 1-Time Auto-Logon and Unlock
-app.post('/api/session/unlock', authenticate, (req, res) => {
-  const { username = 'aliye', password, launchAntigravity = true } = req.body;
-  
-  if (!password) {
-    return res.status(400).json({ 
-      success: false, 
-      error: 'Windows password is required to authenticate on-demand session unlock.' 
-    });
-  }
-
-  console.log(`[SESSION] Dynamic 1-Time AutoLogon requested for user: ${username}`);
-
-  // Escape special characters for Windows command line
-  const escapedPassword = password.replace(/[\^&|<>%]/g, '^$&').replace(/"/g, '\\"');
-  
-  // Set Windows 1-Time AutoLogon in Registry (AutoLogonCount = 1 automatically clears password after 1 logon)
-  const regCommands = [
-    `reg add "HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon" /v AutoAdminLogon /t REG_SZ /d "1" /f`,
-    `reg add "HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon" /v DefaultUserName /t REG_SZ /d "${username}" /f`,
-    `reg add "HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon" /v DefaultPassword /t REG_SZ /d "${escapedPassword}" /f`,
-    `reg add "HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon" /v AutoLogonCount /t REG_DWORD /d 1 /f`
-  ].join(' && ');
-
-  exec(regCommands, (regErr) => {
-    if (regErr) {
-      console.error('[SESSION] Failed to set AutoLogon registry keys:', regErr);
-      return res.status(500).json({ 
-        success: false, 
-        error: 'Failed to configure Windows logon subsystem: ' + regErr.message 
-      });
-    }
-
-    // Respond immediately before session transition
-    res.json({
-      success: true,
-      message: `1-Time AutoLogon armed for ${username}. Unlocking session and launching Antigravity...`
-    });
-
-    // Trigger Winlogon to evaluate the logon credentials
-    setTimeout(() => {
-      exec('taskkill /f /im LogonUI.exe', () => {
-        // If Antigravity requested, start Antigravity once session initiates
-        if (launchAntigravity) {
-          setTimeout(() => {
-            const antigravityExe = 'C:\\Users\\aliye\\AppData\\Local\\Programs\\Antigravity\\Antigravity.exe';
-            exec(`start "" "${antigravityExe}" --minimized`, (agErr) => {
-              if (agErr) console.log('[SESSION] Antigravity launch signal dispatched.');
-            });
-          }, 3000);
-        }
-      });
-    }, 500);
-  });
-});
-
 // Terminal: Execute Remote PowerShell / Command
 app.post('/api/terminal/exec', authenticate, (req, res) => {
   const { command, cwd, timeoutMs = 25000 } = req.body;
@@ -318,8 +262,8 @@ app.post('/api/apps/antigravity', authenticate, (req, res) => {
   });
 });
 
-// Webhook Relay (Allows triggering MacroDroid or other webhooks without browser CORS issues)
-app.post('/api/trigger-webhook', async (req, res) => {
+// Webhook Relay (Protected: Requires Agent Secret Key)
+app.post('/api/trigger-webhook', authenticate, async (req, res) => {
   const { url, method = 'GET', body = null } = req.body;
   if (!url) {
     return res.status(400).json({ success: false, error: 'URL is required' });
