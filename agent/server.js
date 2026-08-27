@@ -223,7 +223,7 @@ app.post('/api/terminal/exec', authenticate, (req, res) => {
 
   logAction(`[TERMINAL] Command received: ${command.slice(0, 100)}`);
   const startTime = Date.now();
-  const workingDir = cwd && fs.existsSync(cwd) ? cwd : process.env.USERPROFILE || 'C:\\Users\\aliye';
+  const workingDir = cwd && fs.existsSync(cwd) ? cwd : process.env.USERPROFILE || os.homedir();
 
   execFile(POWERSHELL_PATH, [
     '-NoProfile',
@@ -251,7 +251,8 @@ app.post('/api/terminal/exec', authenticate, (req, res) => {
 
 // Apps: Direct Launch Antigravity
 app.post('/api/apps/antigravity', authenticate, (req, res) => {
-  const antigravityExe = 'C:\\Users\\aliye\\AppData\\Local\\Programs\\Antigravity\\Antigravity.exe';
+  const localAppData = process.env.LOCALAPPDATA || path.join(os.homedir(), 'AppData', 'Local');
+  const antigravityExe = path.join(localAppData, 'Programs', 'Antigravity', 'Antigravity.exe');
   
   res.json({ success: true, message: 'Launching Antigravity Workspace...' });
 
@@ -299,13 +300,12 @@ function formatUptime(seconds) {
   return `${m}m`;
 }
 
-// Root API info endpoint (pcagent is pure API, pc.hajimammad.com is the website)
+// Root API info endpoint
 app.get('/', (req, res) => {
   res.json({
     status: 'online',
     service: 'Nexus PC Companion API',
-    version: '1.0.0',
-    website: 'https://pc.hajimammad.com'
+    version: '1.0.0'
   });
 });
 

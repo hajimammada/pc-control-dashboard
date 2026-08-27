@@ -2,11 +2,20 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
-    // Automatically proxy all /api/ requests directly to the PC agent tunnel (pcagent.hajimammad.com or agent.hajimammad.com)
+    // Automatically proxy all /api/ requests directly to the configured PC agent tunnel host
     if (url.pathname.startsWith('/api/')) {
-      const targetHost = env.AGENT_HOST || 'pcagent.hajimammad.com';
+      const targetHost = env.AGENT_HOST || '';
+      if (!targetHost) {
+        return new Response(JSON.stringify({ 
+          success: false, 
+          error: 'AGENT_HOST environment variable is not configured on Cloudflare Worker.' 
+        }), {
+          status: 500,
+          headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+        });
+      }
+
       const targetUrl = new URL(url.pathname + url.search, `https://${targetHost}`);
-      
       const modifiedHeaders = new Headers(request.headers);
       modifiedHeaders.set('Host', targetHost);
 
@@ -21,28 +30,17 @@ export default {
         const agentResponse = await fetch(proxyRequest);
         return agentResponse;
       } catch (err) {
-        // Fallback to agent.hajimammad.com if pcagent failed
-        try {
-          const fallbackUrl = new URL(url.pathname + url.search, 'https://agent.hajimammad.com');
-          modifiedHeaders.set('Host', 'agent.hajimammad.com');
-          return await fetch(new Request(fallbackUrl.toString(), {
-            method: request.method,
-            headers: modifiedHeaders,
-            body: request.method !== 'GET' && request.method !== 'HEAD' ? request.body : undefined
-          }));
-        } catch (fallbackErr) {
-          return new Response(JSON.stringify({ 
-            success: false, 
-            online: false, 
-            error: `PC Agent tunnel offline: ${err.message}` 
-          }), {
-            status: 502,
-            headers: { 
-              'Content-Type': 'application/json',
-              'Access-Control-Allow-Origin': '*'
-            }
-          });
-        }
+        return new Response(JSON.stringify({ 
+          success: false, 
+          online: false, 
+          error: `PC Agent tunnel offline: ${err.message}` 
+        }), {
+          status: 502,
+          headers: { 
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*'
+          }
+        });
       }
     }
 

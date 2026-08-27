@@ -142,34 +142,6 @@ export default function App() {
     }
   };
 
-  const [isUnlockingSession, setIsUnlockingSession] = useState(false);
-
-  const handleUnlockAndOpenAntigravity = async () => {
-    if (!settings.windowsPassword) {
-      addToast('Please save your Windows password in Settings first for On-Demand Auto-Logon.', 'error');
-      setIsSettingsOpen(true);
-      return;
-    }
-
-    setIsUnlockingSession(true);
-    addToast('Arming 1-Time AutoLogon & Unlocking Windows session...', 'info');
-
-    try {
-      const res = await unlockWindowsSession(
-        settings.agentUrl, 
-        settings.agentKey, 
-        settings.windowsUsername || 'aliye', 
-        settings.windowsPassword, 
-        true
-      );
-      addToast(res.message || 'Windows session unlocked! Launching Antigravity...', 'success');
-    } catch (err) {
-      addToast(err.message || 'Failed to unlock Windows session', 'error');
-    } finally {
-      setIsUnlockingSession(false);
-    }
-  };
-
   const formattedTime = time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
   const formattedDate = time.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' });
 
@@ -177,7 +149,7 @@ export default function App() {
   const ramPercent = telemetry?.ramUsagePercent || 0;
 
   const remoteDesktopUrl = settings.remoteDesktopUrl || 'https://remotedesktop.google.com/access';
-  const antigravityUrl = settings.antigravityUrl || 'http://localhost:48880';
+  const antigravityUrl = settings.antigravityUrl || '';
 
   return (
     <div className="min-h-screen bg-[#080b12] text-slate-100 flex flex-col justify-between selection:bg-cyan-500/30 selection:text-cyan-200">
@@ -220,7 +192,7 @@ export default function App() {
                 </span>
               </div>
               <p className="text-xs text-slate-400 mt-1">
-                Target: <span className="text-slate-200 font-mono font-semibold">{telemetry?.hostname || 'hajimaPC'}</span>
+                Target: <span className="text-slate-200 font-mono font-semibold">{telemetry?.hostname || 'Host-PC'}</span>
                 {telemetry?.uptimeFormatted && (
                   <> • Uptime: <span className="text-cyan-300 font-mono">{telemetry.uptimeFormatted}</span></>
                 )}
@@ -578,7 +550,7 @@ export default function App() {
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-cyan-400"></span>
             <span className="font-semibold text-slate-300">Nexus PC Controller</span>
-            <span>• Universal Chrome New Tab</span>
+            <span>• Remote PC Control Dashboard</span>
           </div>
 
           <div className="flex items-center gap-3 text-[11px]">

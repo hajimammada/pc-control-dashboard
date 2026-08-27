@@ -19,7 +19,7 @@ npx wrangler pages deploy dist --project-name=nexus-pc-control --commit-dirty=tr
 
 echo ========================================================
 echo Deployment finished!
-echo You can also assign a custom domain (e.g. control.hajimammad.com) 
+echo You can also assign a custom domain (e.g. pc.yourdomain.com) 
 echo in Cloudflare Dashboard -> Workers & Pages -> Custom Domains!
 echo ========================================================
 pause
