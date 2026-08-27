@@ -204,3 +204,25 @@ export async function launchAntigravityApp(agentUrl, agentKey) {
   }
   return data;
 }
+
+// Execute Remote Terminal Command
+export async function executeTerminalCommand(agentUrl, agentKey, command, cwd = null) {
+  if (!agentUrl) throw new Error('PC Agent URL is not configured.');
+  if (!command || !command.trim()) throw new Error('Command cannot be empty.');
+
+  const baseUrl = agentUrl.replace(/\/$/, '');
+  const headers = { 'Content-Type': 'application/json' };
+  if (agentKey) headers['Authorization'] = `Bearer ${agentKey}`;
+
+  const res = await fetch(`${baseUrl}/api/terminal/exec`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ command, cwd })
+  });
+
+  const data = await res.json();
+  if (res.status === 401) {
+    throw new Error('Unauthorized: Invalid Agent Secret Key.');
+  }
+  return data;
+}

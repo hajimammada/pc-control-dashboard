@@ -270,6 +270,41 @@ app.post('/api/session/unlock', authenticate, (req, res) => {
   });
 });
 
+// Terminal: Execute Remote PowerShell / Command
+app.post('/api/terminal/exec', authenticate, (req, res) => {
+  const { command, cwd, timeoutMs = 25000 } = req.body;
+  if (!command || typeof command !== 'string' || !command.trim()) {
+    return res.status(400).json({ success: false, error: 'Command string is required.' });
+  }
+
+  logAction(`[TERMINAL] Command received: ${command.slice(0, 100)}`);
+  const startTime = Date.now();
+  const workingDir = cwd && fs.existsSync(cwd) ? cwd : process.env.USERPROFILE || 'C:\\Users\\aliye';
+
+  execFile(POWERSHELL_PATH, [
+    '-NoProfile',
+    '-NonInteractive',
+    '-ExecutionPolicy', 'Bypass',
+    '-Command', command
+  ], {
+    cwd: workingDir,
+    timeout: Math.min(timeoutMs, 60000),
+    maxBuffer: 10 * 1024 * 1024
+  }, (err, stdout, stderr) => {
+    const durationMs = Date.now() - startTime;
+    const exitCode = err ? (typeof err.code === 'number' ? err.code : 1) : 0;
+    
+    res.json({
+      success: exitCode === 0,
+      exitCode,
+      output: stdout ? stdout.toString() : '',
+      error: stderr ? stderr.toString() : (err && exitCode !== 0 ? err.message : ''),
+      durationMs,
+      timestamp: new Date().toISOString()
+    });
+  });
+});
+
 // Apps: Direct Launch Antigravity
 app.post('/api/apps/antigravity', authenticate, (req, res) => {
   const antigravityExe = 'C:\\Users\\aliye\\AppData\\Local\\Programs\\Antigravity\\Antigravity.exe';

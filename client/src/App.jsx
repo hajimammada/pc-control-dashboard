@@ -25,6 +25,7 @@ import {
 
 import ConfirmPowerModal from './components/ConfirmPowerModal';
 import SettingsModal from './components/SettingsModal';
+import TerminalModal from './components/TerminalModal';
 import Toast from './components/Toast';
 
 import { 
@@ -46,6 +47,7 @@ export default function App() {
 
   // Modals state
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isTerminalOpen, setIsTerminalOpen] = useState(false);
   const [powerActionModal, setPowerActionModal] = useState({ isOpen: false, action: null });
 
   // Toasts state
@@ -231,7 +233,7 @@ export default function App() {
           </div>
 
           {/* Right: Clock & Settings */}
-          <div className="flex items-center gap-5">
+          <div className="flex items-center gap-3 sm:gap-4">
             <div className="text-right">
               <div className="font-mono text-3xl font-bold tracking-wider text-slate-100 drop-shadow">
                 {formattedTime}
@@ -242,8 +244,17 @@ export default function App() {
             </div>
 
             <button
+              onClick={() => setIsTerminalOpen(true)}
+              className="p-3.5 rounded-2xl bg-[#111726] hover:bg-cyan-950/60 text-slate-300 hover:text-cyan-400 border border-slate-700/80 hover:border-cyan-500/40 transition-all duration-200 shadow-lg group flex items-center gap-2 cursor-pointer"
+              title="Open Remote PowerShell Console"
+            >
+              <Terminal className="w-5 h-5 group-hover:scale-110 transition-transform" />
+              <span className="hidden sm:inline text-xs font-bold text-slate-200 font-mono">Terminal</span>
+            </button>
+
+            <button
               onClick={() => setIsSettingsOpen(true)}
-              className="p-3.5 rounded-2xl bg-[#111726] hover:bg-[#19233a] text-slate-300 hover:text-cyan-400 border border-slate-700/80 hover:border-cyan-500/40 transition-all duration-200 shadow-lg group"
+              className="p-3.5 rounded-2xl bg-[#111726] hover:bg-[#19233a] text-slate-300 hover:text-cyan-400 border border-slate-700/80 hover:border-cyan-500/40 transition-all duration-200 shadow-lg group cursor-pointer"
               title="Configure Webhooks & Remote Access"
             >
               <Settings className="w-5 h-5 group-hover:rotate-45 transition-transform duration-300" />
@@ -435,7 +446,7 @@ export default function App() {
             </span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
             
             {/* 1. Chrome Remote Desktop Card */}
             <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#12192b]/95 to-[#0e1424]/95 border border-blue-500/30 hover:border-blue-500/60 p-6 shadow-xl group transition-all duration-300 flex flex-col justify-between">
@@ -516,6 +527,40 @@ export default function App() {
                   <ExternalLink className="w-3 h-3" />
                 </a>
               </div>
+
+            </div>
+
+            {/* 3. Remote PowerShell Terminal Card */}
+            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#12192b]/95 to-[#0e1424]/95 border border-emerald-500/30 hover:border-emerald-500/60 p-6 shadow-xl group transition-all duration-300 flex flex-col justify-between">
+              
+              <div className="flex items-start gap-4 mb-6">
+                <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 group-hover:scale-105 group-hover:bg-emerald-500/20 transition-all duration-300 shrink-0">
+                  <Terminal className="w-7 h-7" />
+                </div>
+
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-bold text-white text-lg group-hover:text-emerald-300 transition-colors">
+                      Remote Terminal
+                    </h3>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                      PowerShell CLI
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-300 mt-1.5 leading-relaxed">
+                    Execute administrative PowerShell commands, inspect running processes, and manage your PC from any browser.
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setIsTerminalOpen(true)}
+                disabled={!isAgentOnline}
+                className="w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+              >
+                <Terminal className="w-4 h-4 text-slate-950" />
+                <span>Open Remote PowerShell Console</span>
+              </button>
 
             </div>
 
@@ -617,6 +662,14 @@ export default function App() {
         onRestoreDefaultApps={() => {}}
         onImportData={() => {}}
         onShowToast={addToast}
+      />
+
+      <TerminalModal
+        isOpen={isTerminalOpen}
+        onClose={() => setIsTerminalOpen(false)}
+        agentUrl={settings.agentUrl}
+        agentKey={settings.agentKey}
+        isAgentOnline={isAgentOnline}
       />
 
       <Toast toasts={toasts} onDismiss={dismissToast} />
