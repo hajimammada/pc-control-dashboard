@@ -34,6 +34,8 @@ import {
   launchAntigravityApp 
 } from './utils/api';
 
+const APP_VERSION = 'v2.0.1';
+
 export default function App() {
   const [settings, setSettings] = useState(() => getStoredSettings());
   const [telemetry, setTelemetry] = useState(null);
@@ -183,6 +185,9 @@ export default function App() {
                 <h1 className="text-2xl font-black tracking-tight text-white">
                   PC COMMAND CENTER
                 </h1>
+                <span className="text-[10px] font-mono font-bold text-cyan-400 bg-cyan-500/10 border border-cyan-500/30 px-2 py-0.5 rounded-md">
+                  {APP_VERSION}
+                </span>
                 <span className={`text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full border ${
                   isAgentOnline 
                     ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' 
