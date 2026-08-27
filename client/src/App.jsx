@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Power, 
   Moon, 
@@ -443,7 +443,7 @@ export default function App() {
             {/* 2. Google Antigravity Card */}
             <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#12192b]/95 to-[#0e1424]/95 border border-purple-500/30 hover:border-purple-500/60 p-6 shadow-xl group transition-all duration-300 flex flex-col justify-between min-h-[260px]">
               
-              <div className="flex items-start gap-4 mb-4">
+              <div className="flex items-start gap-4 mb-6">
                 <div className="w-14 h-14 rounded-2xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 group-hover:scale-105 group-hover:bg-purple-500/20 transition-all duration-300 shrink-0">
                   <Bot className="w-7 h-7" />
                 </div>
@@ -451,39 +451,27 @@ export default function App() {
                 <div>
                   <div className="flex items-center gap-2">
                     <h3 className="font-bold text-white text-lg group-hover:text-purple-300 transition-colors">
-                      Antigravity IDE
+                      Antigravity
                     </h3>
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/20">
-                      AI Workspace
+                      AI Agent
                     </span>
                   </div>
                   <p className="text-xs text-slate-300 mt-1.5 leading-relaxed">
-                    On-demand single-use Windows unlock and automated launch of your agentic coding environment.
+                    Access your Google Antigravity development workspace and agentic coding environment.
                   </p>
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <button
-                  onClick={handleUnlockAndOpenAntigravity}
-                  disabled={!isAgentOnline || isUnlockingSession}
-                  className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-purple-600 to-cyan-500 hover:from-purple-500 hover:to-cyan-400 text-slate-950 font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
-                >
-                  <Sparkles className="w-4 h-4 text-slate-950" />
-                  <span>{isUnlockingSession ? 'Unlocking Session...' : 'Unlock PC & Start Antigravity'}</span>
-                </button>
-
-                <a
-                  href={antigravityUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full py-2 px-3 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white font-medium text-[11px] flex items-center justify-center gap-1.5 border border-white/10 transition-all duration-200"
-                >
-                  <Terminal className="w-3.5 h-3.5" />
-                  <span>Open Antigravity Web Link</span>
-                  <ExternalLink className="w-3 h-3" />
-                </a>
-              </div>
+              <a
+                href={antigravityUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r from-purple-600 to-cyan-500 hover:from-purple-500 hover:to-cyan-400 text-slate-950 font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 transition-all duration-200"
+              >
+                <span>Launch Antigravity</span>
+                <ArrowUpRight className="w-4 h-4" />
+              </a>
 
             </div>
 
