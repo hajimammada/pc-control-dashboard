@@ -24,7 +24,7 @@ async function run() {
     console.log('🎉 REMOTE ACCESS READY (Control your PC from anywhere in the world)!');
     console.log('================================================================');
     console.log(`🔗 Public Secure URL: ${tunnelUrl}`);
-    console.log(`🔑 Secret Key:       ${process.env.AGENT_KEY || 'nexus-secret-key-2026'}`);
+    console.log(`🔑 Secret Key:       ${process.env.AGENT_KEY ? '(Configured in .env)' : 'NOT SET'}`);
     console.log('\n📋 INSTRUCTIONS:');
     console.log('1. Open your Nexus Dashboard on any device (phone, laptop, iPad).');
     console.log('2. Go to Settings -> PC Power & Webhooks.');

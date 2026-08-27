@@ -8,7 +8,7 @@ require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const app = express();
 const PORT = process.env.PORT || 48880;
-const AGENT_KEY = process.env.AGENT_KEY || 'nexus-secret-key-2026';
+const AGENT_KEY = process.env.AGENT_KEY || '';
 
 // Middleware
 app.use(cors({
@@ -26,12 +26,13 @@ function authenticate(req, res, next) {
     ? authHeader.slice(7) 
     : customHeader;
 
-  // If user configured a key, enforce it (query param 'key' also allowed for quick links)
   const reqKey = token || req.query.key;
-  if (AGENT_KEY && reqKey !== AGENT_KEY) {
+
+  // Key must be configured and must match exactly
+  if (!AGENT_KEY || !reqKey || reqKey !== AGENT_KEY) {
     return res.status(401).json({ 
       success: false, 
-      error: 'Unauthorized: Invalid or missing API key.' 
+      error: 'Unauthorized: Invalid or missing Agent Secret Key.' 
     });
   }
   next();
@@ -335,7 +336,7 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Nexus PC Companion Agent is running on port ${PORT}`);
   console.log(`Local Access:   http://localhost:${PORT}`);
   console.log(`Network Access: http://${getLanIp()}:${PORT}`);
-  console.log(`API Key:        ${AGENT_KEY}`);
+  console.log(`Security:       ${AGENT_KEY ? 'Agent Key Configured (Secure)' : 'WARNING: AGENT_KEY NOT SET!'}`);
   console.log(`=======================================================`);
 });
 

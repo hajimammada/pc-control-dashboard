@@ -64,7 +64,7 @@ Double-click:
 ```text
 start-agent.bat
 ```
-*(Runs on `http://localhost:49880` with API Key `nexus-secret-key-2026`)*
+*(Runs on `http://localhost:48880` with your configured `AGENT_KEY` in `agent/.env`)*
 
 ### Option B: Remote Access From Anywhere (Mobile, Cellular, Remote Laptop)
 Double-click:

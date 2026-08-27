@@ -211,7 +211,7 @@ export default function SettingsModal({
                       type="password"
                       value={formData.agentKey}
                       onChange={(e) => handleChange('agentKey', e.target.value)}
-                      placeholder="nexus-secret-key-2026"
+                      placeholder="Paste your Agent Secret Key..."
                       className="w-full bg-[#101726] border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 font-mono"
                     />
                   </div>
