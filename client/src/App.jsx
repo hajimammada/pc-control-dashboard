@@ -29,8 +29,7 @@ import {
   saveStoredSettings, 
   fetchAgentStatus, 
   triggerMacroDroid, 
-  executePowerAction, 
-  launchAntigravityApp 
+  executePowerAction 
 } from './utils/api';
 
 const APP_VERSION = 'v2.1.2';

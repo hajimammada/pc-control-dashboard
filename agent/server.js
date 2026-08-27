@@ -287,19 +287,6 @@ app.post('/api/terminal/exec', authenticate, (req, res) => {
   });
 });
 
-// Apps: Direct Launch Antigravity
-app.post('/api/apps/antigravity', authenticate, (req, res) => {
-  const localAppData = process.env.LOCALAPPDATA || path.join(os.homedir(), 'AppData', 'Local');
-  const antigravityExe = path.join(localAppData, 'Programs', 'Antigravity', 'Antigravity.exe');
-  
-  res.json({ success: true, message: 'Launching Antigravity Workspace...' });
-
-  exec(`start "" "${antigravityExe}"`, (err) => {
-    if (err) {
-      console.error('[APP] Error starting Antigravity:', err);
-    }
-  });
-});
 
 // Webhook Relay (Protected: Requires Agent Secret Key)
 app.post('/api/trigger-webhook', authenticate, async (req, res) => {

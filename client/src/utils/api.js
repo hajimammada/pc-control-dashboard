@@ -252,24 +252,6 @@ export async function fetchSessionStatus(agentUrl, agentKey) {
   }
 }
 
-// Launch Antigravity Application
-export async function launchAntigravityApp(agentUrl, agentKey) {
-  if (!agentUrl) throw new Error('Agent URL is required');
-  const baseUrl = agentUrl.replace(/\/$/, '');
-  const headers = { 'Content-Type': 'application/json' };
-  if (agentKey) headers['Authorization'] = `Bearer ${agentKey}`;
-
-  const res = await fetch(`${baseUrl}/api/apps/antigravity`, {
-    method: 'POST',
-    headers
-  });
-
-  const data = await res.json();
-  if (!res.ok || !data.success) {
-    throw new Error(data.error || 'Failed to start Antigravity');
-  }
-  return data;
-}
 
 // Execute Remote Terminal Command
 export async function executeTerminalCommand(agentUrl, agentKey, command, cwd = null) {
