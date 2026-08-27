@@ -30,11 +30,10 @@ import {
   fetchAgentStatus, 
   triggerMacroDroid, 
   executePowerAction, 
-  unlockWindowsSession, 
   launchAntigravityApp 
 } from './utils/api';
 
-const APP_VERSION = 'v2.1.0';
+const APP_VERSION = 'v2.1.1';
 
 export default function App() {
   const [settings, setSettings] = useState(() => getStoredSettings());
@@ -110,7 +109,7 @@ export default function App() {
     addToast('Dispatching MacroDroid Power-ON signal...', 'info');
 
     try {
-      const res = await triggerMacroDroid(settings.macrodroidWebhookUrl, settings.agentUrl);
+      const res = await triggerMacroDroid(settings.macrodroidWebhookUrl, settings.agentUrl, settings.agentKey);
       addToast(res.message || 'MacroDroid Power-ON triggered successfully!', 'success');
     } catch (err) {
       addToast(err.message || 'Failed to dispatch MacroDroid signal', 'error');

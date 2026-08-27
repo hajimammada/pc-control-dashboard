@@ -122,7 +122,7 @@ export function exportSettingsFile(settings) {
 }
 
 // Trigger MacroDroid Webhook
-export async function triggerMacroDroid(webhookUrl, agentUrl = null) {
+export async function triggerMacroDroid(webhookUrl, agentUrl = null, agentKey = null) {
   if (!webhookUrl || !webhookUrl.trim()) {
     throw new Error('MacroDroid Webhook URL is not configured. Please open Settings to configure it.');
   }
@@ -141,17 +141,22 @@ export async function triggerMacroDroid(webhookUrl, agentUrl = null) {
     console.warn('Direct fetch failed, attempting relay via PC Agent...', err);
   }
 
-  // If direct failed, try agent relay
+  // If direct failed, try authenticated agent relay
   if (agentUrl) {
     try {
+      const headers = { 'Content-Type': 'application/json' };
+      if (agentKey) {
+        headers['Authorization'] = `Bearer ${agentKey}`;
+      }
+
       const res = await fetch(`${agentUrl.replace(/\/$/, '')}/api/trigger-webhook`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({ url: cleanUrl, method: 'GET' })
       });
       const data = await res.json();
       if (data.success) {
-        return { success: true, message: 'MacroDroid signal sent via Agent Relay!' };
+        return { success: true, message: 'MacroDroid signal sent via Authenticated Agent Relay!' };
       }
     } catch (relayErr) {
       console.warn('Agent relay failed:', relayErr);
@@ -227,30 +232,6 @@ export async function executePowerAction(action, agentUrl, agentKey, options = {
   const data = await res.json();
   if (!res.ok || !data.success) {
     throw new Error(data.error || `Failed to execute ${action}`);
-  }
-  return data;
-}
-
-// Trigger On-Demand 1-Time Auto-Logon and Unlock
-export async function unlockWindowsSession(agentUrl, agentKey, username, password, launchAntigravity = true) {
-  if (!agentUrl) throw new Error('Agent URL is required');
-  if (!password) throw new Error('Windows password is required to unlock session');
-  const baseUrl = agentUrl.replace(/\/$/, '');
-
-  const headers = { 'Content-Type': 'application/json' };
-  if (agentKey) {
-    headers['Authorization'] = `Bearer ${agentKey}`;
-  }
-
-  const res = await fetch(`${baseUrl}/api/session/unlock`, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify({ username, password, launchAntigravity })
-  });
-
-  const data = await res.json();
-  if (!res.ok || !data.success) {
-    throw new Error(data.error || 'Failed to unlock Windows session');
   }
   return data;
 }

@@ -84,7 +84,7 @@ export default function SettingsModal({
     }
     setTestingWebhook(true);
     try {
-      const res = await triggerMacroDroid(formData.macrodroidWebhookUrl, formData.agentUrl);
+      const res = await triggerMacroDroid(formData.macrodroidWebhookUrl, formData.agentUrl, formData.agentKey);
       onShowToast(res.message || 'MacroDroid signal dispatched!', 'success');
     } catch (err) {
       onShowToast(err.message || 'Failed to dispatch MacroDroid signal', 'error');
