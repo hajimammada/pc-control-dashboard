@@ -149,6 +149,7 @@ app.get('/api/status', authenticate, (req, res) => {
 const POWERSHELL_PATH = 'C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe';
 const SHUTDOWN_PATH = 'C:\\Windows\\System32\\shutdown.exe';
 const TSDISCON_PATH = 'C:\\Windows\\System32\\tsdiscon.exe';
+const TSCON_PATH = 'C:\\Windows\\System32\\tscon.exe';
 const RUNDLL32_PATH = 'C:\\Windows\\System32\\rundll32.exe';
 
 const LOG_FILE = path.join(__dirname, 'agent_activity.log');
@@ -235,6 +236,47 @@ app.post('/api/power/lock', authenticate, (req, res) => {
       });
     });
   }, 300);
+});
+
+// Power: Unlock / Reconnect Workstation Session to Physical Console
+app.post('/api/power/unlock', authenticate, (req, res) => {
+  logAction(`[POWER] Unlock / Reconnect session command received from ${req.ip}`);
+
+  // Query active / disconnected sessions dynamically
+  exec('quser', (err, stdout) => {
+    let targetSessionId = '1'; // Default session ID
+    if (stdout) {
+      const lines = stdout.trim().split('\n');
+      for (let line of lines) {
+        if (!line.toLowerCase().includes('username')) {
+          const parts = line.trim().split(/\s+/);
+          for (let p of parts) {
+            if (/^\d+$/.test(p) && p !== '0') {
+              targetSessionId = p;
+              break;
+            }
+          }
+        }
+      }
+    }
+
+    logAction(`[POWER] Attaching session ID ${targetSessionId} to console via tscon...`);
+    execFile(TSCON_PATH, [targetSessionId, '/dest:console'], (err2, stdout2, stderr2) => {
+      if (err2) {
+        logAction(`[POWER] tscon ${targetSessionId} /dest:console error: ${err2.message}`);
+        // Fallback: Try session 1 and session 2
+        exec(`${TSCON_PATH} 1 /dest:console`);
+        exec(`${TSCON_PATH} 2 /dest:console`);
+      } else {
+        logAction(`[POWER] Session ${targetSessionId} unlocked and re-attached to console.`);
+      }
+    });
+
+    res.json({
+      success: true,
+      message: `Session unlock signal dispatched to Console (Session ID: ${targetSessionId}).`
+    });
+  });
 });
 
 // Session: Check active user session status

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { AlertTriangle, Moon, RotateCcw, Power, Lock, X, ShieldAlert, CheckCircle2 } from 'lucide-react';
+import { AlertTriangle, Moon, RotateCcw, Power, Lock, Unlock, X, ShieldAlert, CheckCircle2 } from 'lucide-react';
 
 export default function ConfirmPowerModal({ isOpen, onClose, action, onConfirm }) {
   if (!isOpen || !action) return null;
@@ -43,6 +43,16 @@ export default function ConfirmPowerModal({ isOpen, onClose, action, onConfirm }
       borderColor: 'border-cyan-500/30',
       description: 'Locks the current Windows user session immediately.',
       buttonText: 'Lock Workstation',
+      buttonClass: 'bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold'
+    },
+    unlock: {
+      title: 'Unlock Windows Session',
+      icon: Unlock,
+      iconColor: '#06b6d4',
+      bgColor: 'bg-cyan-500/10',
+      borderColor: 'border-cyan-500/30',
+      description: 'Re-attaches your active Windows desktop session to the physical console, bypassing the lock screen.',
+      buttonText: 'Unlock Workstation',
       buttonClass: 'bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold'
     }
   }[action] || {

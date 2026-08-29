@@ -224,7 +224,7 @@ export async function executePowerAction(action, agentUrl, agentKey, options = {
   if (!agentUrl) throw new Error('Agent URL is required');
   const baseUrl = agentUrl.replace(/\/$/, '');
 
-  const validActions = ['sleep', 'restart', 'shutdown', 'abort', 'lock'];
+  const validActions = ['sleep', 'restart', 'shutdown', 'abort', 'lock', 'unlock'];
   if (!validActions.includes(action)) {
     throw new Error(`Invalid action: ${action}`);
   }

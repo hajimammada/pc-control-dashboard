@@ -4,6 +4,7 @@ import {
   Moon, 
   RotateCcw, 
   Lock, 
+  Unlock,
   Zap, 
   Monitor, 
   Bot, 
@@ -32,7 +33,7 @@ import {
   executePowerAction 
 } from './utils/api';
 
-const APP_VERSION = 'v2.1.3';
+const APP_VERSION = 'v2.2.0';
 
 export default function App() {
   const [settings, setSettings] = useState(() => getStoredSettings());
@@ -238,8 +239,8 @@ export default function App() {
             </span>
           </div>
 
-          {/* Equal-sized 5-button responsive grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+          {/* Equal-sized 6-button responsive grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
             
             {/* 1. Turn ON (Wake-on-LAN) Tile */}
             <button
@@ -265,7 +266,55 @@ export default function App() {
               </div>
             </button>
 
-            {/* 2. Sleep PC Tile */}
+            {/* 2. Unlock PC Tile */}
+            <button
+              onClick={() => handleRequestPowerAction('unlock')}
+              disabled={!isAgentOnline}
+              className="relative p-5 rounded-3xl bg-[#111728]/95 hover:bg-cyan-950/60 border border-cyan-500/30 hover:border-cyan-500/60 shadow-lg text-left transition-all duration-200 group flex flex-col justify-between disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer min-h-[170px]"
+            >
+              <div className="flex items-center justify-between w-full mb-3">
+                <div className="p-3 rounded-2xl bg-cyan-500/10 text-cyan-400 group-hover:scale-110 transition-transform">
+                  <Unlock className="w-6 h-6" />
+                </div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded-full border border-cyan-500/20">
+                  Console
+                </span>
+              </div>
+              <div>
+                <h4 className="font-bold text-white text-base group-hover:text-cyan-300 transition-colors">
+                  Unlock PC
+                </h4>
+                <p className="text-xs text-slate-400 mt-1 leading-snug">
+                  Attach session to console
+                </p>
+              </div>
+            </button>
+
+            {/* 3. Lock Workstation Tile */}
+            <button
+              onClick={() => handleRequestPowerAction('lock')}
+              disabled={!isAgentOnline}
+              className="relative p-5 rounded-3xl bg-[#111728]/95 hover:bg-blue-950/60 border border-blue-500/30 hover:border-blue-500/60 shadow-lg text-left transition-all duration-200 group flex flex-col justify-between disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer min-h-[170px]"
+            >
+              <div className="flex items-center justify-between w-full mb-3">
+                <div className="p-3 rounded-2xl bg-blue-500/10 text-blue-400 group-hover:scale-110 transition-transform">
+                  <Lock className="w-6 h-6" />
+                </div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full border border-blue-500/20">
+                  Security
+                </span>
+              </div>
+              <div>
+                <h4 className="font-bold text-white text-base group-hover:text-blue-300 transition-colors">
+                  Lock Screen
+                </h4>
+                <p className="text-xs text-slate-400 mt-1 leading-snug">
+                  Lock active desktop session
+                </p>
+              </div>
+            </button>
+
+            {/* 4. Sleep PC Tile */}
             <button
               onClick={() => handleRequestPowerAction('sleep')}
               disabled={!isAgentOnline}
@@ -289,7 +338,7 @@ export default function App() {
               </div>
             </button>
 
-            {/* 3. Restart PC Tile */}
+            {/* 5. Restart PC Tile */}
             <button
               onClick={() => handleRequestPowerAction('restart')}
               disabled={!isAgentOnline}
@@ -313,7 +362,7 @@ export default function App() {
               </div>
             </button>
 
-            {/* 4. Shut Down PC Tile */}
+            {/* 6. Shut Down PC Tile */}
             <button
               onClick={() => handleRequestPowerAction('shutdown')}
               disabled={!isAgentOnline}
@@ -333,30 +382,6 @@ export default function App() {
                 </h4>
                 <p className="text-xs text-slate-400 mt-1 leading-snug">
                   Complete hardware shutdown
-                </p>
-              </div>
-            </button>
-
-            {/* 5. Lock Workstation Tile */}
-            <button
-              onClick={() => handleRequestPowerAction('lock')}
-              disabled={!isAgentOnline}
-              className="relative p-5 rounded-3xl bg-[#111728]/95 hover:bg-cyan-950/60 border border-cyan-500/30 hover:border-cyan-500/60 shadow-lg text-left transition-all duration-200 group flex flex-col justify-between disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer min-h-[170px]"
-            >
-              <div className="flex items-center justify-between w-full mb-3">
-                <div className="p-3 rounded-2xl bg-cyan-500/10 text-cyan-400 group-hover:scale-110 transition-transform">
-                  <Lock className="w-6 h-6" />
-                </div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded-full border border-cyan-500/20">
-                  Security
-                </span>
-              </div>
-              <div>
-                <h4 className="font-bold text-white text-base group-hover:text-cyan-300 transition-colors">
-                  Lock Screen
-                </h4>
-                <p className="text-xs text-slate-400 mt-1 leading-snug">
-                  Lock active desktop session
                 </p>
               </div>
             </button>
