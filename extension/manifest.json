@@ -1,0 +1,10 @@
+{
+  "manifest_version": 3,
+  "name": "PC Control Dashboard",
+  "version": "2.2.1",
+  "description": "PC Remote Control Dashboard & New Tab Startpage",
+  "chrome_url_overrides": {
+    "newtab": "index.html"
+  },
+  "permissions": []
+}

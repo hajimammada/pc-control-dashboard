@@ -3,7 +3,7 @@
   "version": "1.4.0",
   "description": "Universal PC Remote Controller Startpage and Dashboard",
   "scripts": {
-    "build": "cd client && npm install && npm run build && cd .. && node -e \"const fs=require('fs'); fs.copyFileSync('./dist/index.html', './index.html'); if (fs.existsSync('./assets')) fs.rmSync('./assets', {recursive:true, force:true}); fs.cpSync('./dist/assets', './assets', {recursive:true});\"",
+    "build": "cd client && npm install && npm run build && cd .. && node -e \"const fs=require('fs'); fs.copyFileSync('./dist/index.html', './index.html'); if (fs.existsSync('./assets')) fs.rmSync('./assets', {recursive:true, force:true}); fs.cpSync('./dist/assets', './assets', {recursive:true}); fs.copyFileSync('./dist/index.html', './extension/index.html'); if (fs.existsSync('./extension/assets')) fs.rmSync('./extension/assets', {recursive:true, force:true}); fs.cpSync('./dist/assets', './extension/assets', {recursive:true});\"",
     "start": "node agent/server.js"
   }
 }
