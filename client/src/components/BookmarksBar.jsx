@@ -101,7 +101,7 @@ export default function BookmarksBar() {
   };
 
   return (
-    <div className="w-full bg-[#080b13]/95 border-b border-slate-800/80 backdrop-blur-md px-4 py-1.5 flex items-center justify-center text-xs z-30 transition-all shadow-sm">
+    <div className="relative w-full bg-[#080b13]/95 border-b border-slate-800/80 backdrop-blur-md px-4 py-1.5 flex items-center justify-center text-xs z-40 transition-all shadow-sm overflow-visible">
       
       {/* Hidden File Input */}
       <input
@@ -112,7 +112,7 @@ export default function BookmarksBar() {
         onChange={handleFileChange}
       />
 
-      <div className="max-w-7xl mx-auto w-full flex items-center justify-center gap-2 overflow-x-auto scrollbar-none py-0.5" ref={dropdownRef}>
+      <div className="max-w-7xl mx-auto w-full flex items-center justify-center gap-2 py-0.5 overflow-visible" ref={dropdownRef}>
         
         {/* EMPTY STATE: Show Centered Import Button */}
         {(!bookmarks || bookmarks.length === 0) ? (
@@ -130,7 +130,7 @@ export default function BookmarksBar() {
           </div>
         ) : (
           /* POPULATED STATE: Centered Bookmarks List */
-          <div className="flex items-center justify-center gap-1 flex-nowrap">
+          <div className="flex items-center justify-center gap-1 flex-wrap sm:flex-nowrap overflow-visible">
             
             {/* Chrome Apps shortcut icon */}
             <a
@@ -165,16 +165,19 @@ export default function BookmarksBar() {
                       <ChevronDown className={`w-3 h-3 text-slate-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
                     </button>
 
-                    {/* Folder Dropdown Menu */}
+                    {/* Folder Dropdown Menu - Floating & Unclipped */}
                     {isOpen && (
-                      <div className="absolute top-full left-0 mt-1 w-60 max-h-80 overflow-y-auto rounded-2xl bg-[#111728] border border-slate-700 shadow-2xl p-1.5 z-50 animate-slide-up text-left">
+                      <div className="absolute top-full left-0 mt-2 min-w-[250px] max-h-96 overflow-y-auto rounded-2xl bg-[#111728] border border-slate-700/90 shadow-2xl p-2 z-50 animate-slide-up text-left backdrop-blur-xl ring-1 ring-white/10">
+                        <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-2.5 py-1 mb-1 border-b border-slate-800">
+                          {item.title} ({item.children.length})
+                        </div>
                         {item.children.map((child) => (
                           <a
                             key={child.id}
                             href={child.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/80 transition-colors text-xs group"
+                            className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/80 transition-colors text-xs group cursor-pointer"
                             onClick={() => setActiveFolderId(null)}
                           >
                             <img
@@ -184,7 +187,7 @@ export default function BookmarksBar() {
                               onError={(e) => { e.target.style.display = 'none'; }}
                             />
                             <span className="truncate flex-1">{child.title}</span>
-                            <ExternalLink className="w-3 h-3 text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+                            <ExternalLink className="w-3 h-3 text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
                           </a>
                         ))}
                       </div>
