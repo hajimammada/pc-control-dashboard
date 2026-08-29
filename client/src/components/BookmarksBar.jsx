@@ -4,73 +4,60 @@ import {
   Folder, 
   ChevronDown, 
   Globe,
-  Upload,
-  Plus,
-  Trash2,
+  Settings,
+  Bookmark,
   LayoutGrid
 } from 'lucide-react';
-import { parseNetscapeBookmarksHtml } from '../utils/bookmarkParser';
 
 const STORAGE_KEY = 'pc_control_custom_bookmarks_v1';
 
-export default function BookmarksBar() {
+export default function BookmarksBar({ onOpenSettings }) {
   const [bookmarks, setBookmarks] = useState(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) return JSON.parse(saved);
     } catch (e) {}
-    return []; // Empty by default as requested!
+    return []; // Empty by default
   });
 
   const [activeFolderId, setActiveFolderId] = useState(null);
-  const fileInputRef = useRef(null);
   const dropdownRef = useRef(null);
 
-  // Save to localStorage when updated
-  const saveBookmarks = (items) => {
-    setBookmarks(items);
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-    } catch (e) {
-      console.error('Failed to save bookmarks:', e);
-    }
-  };
-
-  // Handle HTML File Upload
-  const handleFileChange = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
+  // Sync with Chrome Extension Bookmarks API if running in extension mode
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.chrome && window.chrome.bookmarks && window.chrome.bookmarks.getTree) {
       try {
-        const text = event.target?.result;
-        if (typeof text === 'string') {
-          // If JSON
-          if (text.trim().startsWith('[') || text.trim().startsWith('{')) {
-            try {
-              const parsed = JSON.parse(text);
-              const list = Array.isArray(parsed) ? parsed : (parsed.bookmarks || []);
-              saveBookmarks(list);
-              return;
-            } catch {}
+        window.chrome.bookmarks.getTree((tree) => {
+          if (tree && tree.length > 0) {
+            const root = tree[0];
+            const bar = root.children?.find(c => c.id === '1' || c.title?.toLowerCase().includes('bar') || c.title?.toLowerCase().includes('toolbar')) || root.children?.[0];
+            if (bar && bar.children && bar.children.length > 0) {
+              setBookmarks(bar.children);
+            }
           }
-          // Parse Netscape Bookmark HTML
-          const parsedBookmarks = parseNetscapeBookmarksHtml(text);
-          if (parsedBookmarks && parsedBookmarks.length > 0) {
-            saveBookmarks(parsedBookmarks);
-          } else {
-            alert('Could not find any bookmarks in this HTML file.');
-          }
-        }
+        });
       } catch (err) {
-        console.error('Error parsing bookmarks file:', err);
-        alert('Failed to parse bookmarks file: ' + err.message);
+        console.warn('Chrome bookmarks API error:', err);
       }
+    }
+  }, []);
+
+  // Listen to live bookmark updates dispatched from SettingsModal
+  useEffect(() => {
+    const handleUpdate = (e) => {
+      setBookmarks(e.detail || []);
     };
-    reader.readAsText(file);
-    e.target.value = ''; // Reset
-  };
+    window.addEventListener('pc_control_bookmarks_updated', handleUpdate);
+    window.addEventListener('storage', () => {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        setBookmarks(saved ? JSON.parse(saved) : []);
+      } catch (e) {}
+    });
+    return () => {
+      window.removeEventListener('pc_control_bookmarks_updated', handleUpdate);
+    };
+  }, []);
 
   // Close folder dropdown on outside click
   useEffect(() => {
@@ -94,38 +81,22 @@ export default function BookmarksBar() {
     }
   };
 
-  const handleClear = () => {
-    if (window.confirm('Clear all bookmarks from the bar?')) {
-      saveBookmarks([]);
-    }
-  };
-
   return (
     <div className="relative w-full bg-[#080b13]/95 border-b border-slate-800/80 backdrop-blur-md px-4 py-1.5 flex items-center justify-center text-xs z-40 transition-all shadow-sm overflow-visible">
-      
-      {/* Hidden File Input */}
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept=".html,.htm,.json"
-        className="hidden"
-        onChange={handleFileChange}
-      />
-
       <div className="max-w-7xl mx-auto w-full flex items-center justify-center gap-2 py-0.5 overflow-visible" ref={dropdownRef}>
         
-        {/* EMPTY STATE: Show Centered Import Button */}
+        {/* EMPTY STATE: Prompt to import in Settings */}
         {(!bookmarks || bookmarks.length === 0) ? (
           <div className="flex items-center justify-center gap-3 py-0.5">
             <button
-              onClick={() => fileInputRef.current?.click()}
+              onClick={() => onOpenSettings?.('bookmarks')}
               className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 hover:border-cyan-500/50 transition-all duration-200 cursor-pointer shadow-sm group font-medium"
             >
-              <Upload className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
-              <span>Import Bookmarks (.html)</span>
+              <Bookmark className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
+              <span>Import Bookmarks in Settings</span>
             </button>
             <span className="text-[11px] text-slate-500">
-              (Export from Chrome $\rightarrow$ Select file to populate bar)
+              (Settings ⚙️ $\rightarrow$ Bookmarks & Extension)
             </span>
           </div>
         ) : (
@@ -221,24 +192,6 @@ export default function BookmarksBar() {
                 </a>
               );
             })}
-
-            {/* Manage/Re-import & Clear Icons */}
-            <div className="flex items-center gap-1 ml-2 pl-2 border-l border-slate-800 flex-shrink-0">
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                className="p-1 rounded-md text-slate-500 hover:text-cyan-300 hover:bg-slate-800/60 transition-colors cursor-pointer"
-                title="Re-import / Replace Bookmarks (.html)"
-              >
-                <Upload className="w-3.5 h-3.5" />
-              </button>
-              <button
-                onClick={handleClear}
-                className="p-1 rounded-md text-slate-500 hover:text-rose-400 hover:bg-slate-800/60 transition-colors cursor-pointer"
-                title="Clear Bookmarks Bar"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-              </button>
-            </div>
 
           </div>
         )}

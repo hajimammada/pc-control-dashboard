@@ -34,7 +34,7 @@ import {
   executePowerAction 
 } from './utils/api';
 
-const APP_VERSION = 'v2.3.0';
+const APP_VERSION = 'v2.3.1';
 
 export default function App() {
   const [settings, setSettings] = useState(() => getStoredSettings());
@@ -45,6 +45,7 @@ export default function App() {
 
   // Modals state
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [settingsInitialTab, setSettingsInitialTab] = useState('general');
   const [isTerminalOpen, setIsTerminalOpen] = useState(false);
   const [powerActionModal, setPowerActionModal] = useState({ isOpen: false, action: null });
 
@@ -157,7 +158,7 @@ export default function App() {
     <div className="min-h-screen bg-[#080b12] text-slate-100 flex flex-col justify-between selection:bg-cyan-500/30 selection:text-cyan-200">
       
       {/* Top Chrome-Style Bookmarks Bar */}
-      <BookmarksBar />
+      <BookmarksBar onOpenSettings={(tab) => { setSettingsInitialTab(tab || 'general'); setIsSettingsOpen(true); }} />
 
       {/* Background ambient lighting */}
       <div className="fixed top-0 left-1/4 w-[500px] h-[500px] bg-cyan-500/5 rounded-full blur-3xl pointer-events-none"></div>
@@ -628,10 +629,8 @@ export default function App() {
         onClose={() => setIsSettingsOpen(false)}
         settings={settings}
         onSaveSettings={handleSaveSettings}
-        apps={[]}
-        onRestoreDefaultApps={() => {}}
-        onImportData={() => {}}
         onShowToast={addToast}
+        initialTab={settingsInitialTab}
       />
 
       <TerminalModal

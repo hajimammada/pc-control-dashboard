@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { 
   X, 
   Settings, 
@@ -12,23 +12,49 @@ import {
   FileText,
   Upload,
   Download,
-  FolderOpen
+  FolderOpen,
+  Bookmark,
+  Trash2,
+  Chrome
 } from 'lucide-react';
 import { triggerMacroDroid, fetchAgentStatus, parseSettingsFile, exportSettingsFile } from '../utils/api';
+import { parseNetscapeBookmarksHtml } from '../utils/bookmarkParser';
+
+const BOOKMARK_STORAGE_KEY = 'pc_control_custom_bookmarks_v1';
 
 export default function SettingsModal({ 
   isOpen, 
   onClose, 
   settings, 
   onSaveSettings, 
-  onShowToast
+  onShowToast,
+  initialTab = 'general'
 }) {
   const [formData, setFormData] = useState({ ...settings });
   const [testingWebhook, setTestingWebhook] = useState(false);
   const [testingAgent, setTestingAgent] = useState(false);
   const [agentTestResult, setAgentTestResult] = useState(null);
-  const [activeTab, setActiveTab] = useState('general');
+  const [activeTab, setActiveTab] = useState(initialTab || 'general');
+  const [bookmarkCount, setBookmarkCount] = useState(0);
+
   const fileInputRef = useRef(null);
+  const bookmarkInputRef = useRef(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      setFormData({ ...settings });
+      if (initialTab) setActiveTab(initialTab);
+      try {
+        const saved = localStorage.getItem(BOOKMARK_STORAGE_KEY);
+        if (saved) {
+          const list = JSON.parse(saved);
+          setBookmarkCount(Array.isArray(list) ? list.length : 0);
+        } else {
+          setBookmarkCount(0);
+        }
+      } catch (e) {}
+    }
+  }, [isOpen, settings, initialTab]);
 
   if (!isOpen) return null;
 
@@ -117,6 +143,57 @@ export default function SettingsModal({
     }
   };
 
+  // Bookmark Import from HTML
+  const handleBookmarkImport = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const text = ev.target?.result;
+        if (typeof text === 'string') {
+          // If JSON
+          if (text.trim().startsWith('[') || text.trim().startsWith('{')) {
+            try {
+              const parsed = JSON.parse(text);
+              const list = Array.isArray(parsed) ? parsed : (parsed.bookmarks || []);
+              localStorage.setItem(BOOKMARK_STORAGE_KEY, JSON.stringify(list));
+              window.dispatchEvent(new CustomEvent('pc_control_bookmarks_updated', { detail: list }));
+              setBookmarkCount(list.length);
+              onShowToast(`Successfully imported ${list.length} bookmarks!`, 'success');
+              return;
+            } catch {}
+          }
+          // Parse HTML
+          const parsedBookmarks = parseNetscapeBookmarksHtml(text);
+          if (parsedBookmarks && parsedBookmarks.length > 0) {
+            localStorage.setItem(BOOKMARK_STORAGE_KEY, JSON.stringify(parsedBookmarks));
+            window.dispatchEvent(new CustomEvent('pc_control_bookmarks_updated', { detail: parsedBookmarks }));
+            setBookmarkCount(parsedBookmarks.length);
+            onShowToast(`Successfully imported ${parsedBookmarks.length} bookmarks & folders!`, 'success');
+          } else {
+            onShowToast('Could not find bookmarks in this HTML file.', 'error');
+          }
+        }
+      } catch (err) {
+        onShowToast('Error importing bookmarks: ' + err.message, 'error');
+      } finally {
+        if (bookmarkInputRef.current) bookmarkInputRef.current.value = '';
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const handleClearBookmarks = () => {
+    if (window.confirm('Clear all custom bookmarks from the top bar?')) {
+      localStorage.removeItem(BOOKMARK_STORAGE_KEY);
+      window.dispatchEvent(new CustomEvent('pc_control_bookmarks_updated', { detail: [] }));
+      setBookmarkCount(0);
+      onShowToast('Bookmarks cleared successfully.', 'success');
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
       <div className="relative w-full max-w-xl rounded-3xl bg-[#101726] border border-slate-700 shadow-2xl overflow-hidden animate-slide-up flex flex-col max-h-[90vh]">
@@ -128,8 +205,8 @@ export default function SettingsModal({
               <Settings className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-bold text-white text-base">PC Remote & Power Settings</h3>
-              <p className="text-xs text-slate-400">Configure MacroDroid & remote PC connection</p>
+              <h3 className="font-bold text-white text-base">Dashboard & PC Settings</h3>
+              <p className="text-xs text-slate-400">Configure power, tunnels, bookmarks & extensions</p>
             </div>
           </div>
 
@@ -183,18 +260,25 @@ export default function SettingsModal({
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex items-center gap-2 px-6 pt-3 mt-1 border-b border-slate-800 bg-[#0e1422] text-xs font-semibold">
+        <div className="flex items-center gap-2 px-6 pt-3 mt-1 border-b border-slate-800 bg-[#0e1422] text-xs font-semibold overflow-x-auto">
           <button
             onClick={() => setActiveTab('general')}
-            className={`pb-2.5 px-3 border-b-2 transition-colors cursor-pointer ${activeTab === 'general' ? 'border-cyan-400 text-cyan-300' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
+            className={`pb-2.5 px-3 border-b-2 transition-colors whitespace-nowrap cursor-pointer ${activeTab === 'general' ? 'border-cyan-400 text-cyan-300' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
           >
             Power & Webhooks
           </button>
           <button
             onClick={() => setActiveTab('remote')}
-            className={`pb-2.5 px-3 border-b-2 transition-colors cursor-pointer ${activeTab === 'remote' ? 'border-cyan-400 text-cyan-300' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
+            className={`pb-2.5 px-3 border-b-2 transition-colors whitespace-nowrap cursor-pointer ${activeTab === 'remote' ? 'border-cyan-400 text-cyan-300' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
           >
             Remote Access URLs
+          </button>
+          <button
+            onClick={() => setActiveTab('bookmarks')}
+            className={`pb-2.5 px-3 border-b-2 transition-colors whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${activeTab === 'bookmarks' ? 'border-cyan-400 text-cyan-300' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
+          >
+            <Bookmark className="w-3.5 h-3.5" />
+            <span>Bookmarks & Extension</span>
           </button>
         </div>
 
@@ -335,6 +419,92 @@ export default function SettingsModal({
                   placeholder="https://antigravity.google.com"
                   className="w-full bg-[#101726] border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 font-mono"
                 />
+              </div>
+
+            </div>
+          )}
+
+          {/* TAB 3: BOOKMARKS & CHROME EXTENSION */}
+          {activeTab === 'bookmarks' && (
+            <div className="space-y-5">
+              
+              {/* Hidden Bookmark File Input */}
+              <input
+                type="file"
+                ref={bookmarkInputRef}
+                accept=".html,.htm,.json"
+                className="hidden"
+                onChange={handleBookmarkImport}
+              />
+
+              {/* 1. Bookmarks Importer Card */}
+              <div className="p-4 rounded-2xl bg-[#141c2e] border border-cyan-500/30 shadow-md">
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-xs font-bold text-white flex items-center gap-2">
+                    <Bookmark className="w-4 h-4 text-cyan-400" />
+                    Top Bookmarks Bar Manager
+                  </label>
+                  <span className="text-[10px] font-mono font-bold text-cyan-300 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">
+                    {bookmarkCount > 0 ? `${bookmarkCount} Items Loaded` : 'Empty'}
+                  </span>
+                </div>
+                <p className="text-xs text-slate-400 mb-4 leading-relaxed">
+                  Import your exported Chrome/Firefox bookmarks HTML file to populate the top bookmarks bar:
+                </p>
+
+                <div className="flex flex-col sm:flex-row items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => bookmarkInputRef.current?.click()}
+                    className="w-full sm:w-auto flex-1 py-2.5 px-4 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold text-xs flex items-center justify-center gap-2 shadow-md shadow-cyan-500/20 transition-all cursor-pointer"
+                  >
+                    <Upload className="w-4 h-4" />
+                    <span>Import Bookmarks (.html)</span>
+                  </button>
+
+                  {bookmarkCount > 0 && (
+                    <button
+                      type="button"
+                      onClick={handleClearBookmarks}
+                      className="w-full sm:w-auto py-2.5 px-4 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 text-xs font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      <span>Clear Bar</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* 2. Download Chrome Extension Card */}
+              <div className="p-4 rounded-2xl bg-[#141c2e] border border-blue-500/30 shadow-md">
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-xs font-bold text-white flex items-center gap-2">
+                    <Chrome className="w-4 h-4 text-blue-400" />
+                    Download Chrome New Tab Extension
+                  </label>
+                  <span className="text-[10px] uppercase font-bold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20">
+                    Extension ZIP
+                  </span>
+                </div>
+                <p className="text-xs text-slate-400 mb-4 leading-relaxed">
+                  Download the extension package to install this dashboard as your Chrome New Tab page on any computer:
+                </p>
+
+                <a
+                  href="/pc-control-extension.zip"
+                  download="pc-control-extension.zip"
+                  className="w-full py-2.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-blue-600/20 transition-all cursor-pointer"
+                >
+                  <Download className="w-4 h-4" />
+                  <span>Download Extension (.zip)</span>
+                </a>
+
+                <div className="mt-3 p-3 rounded-xl bg-[#0d1320] border border-slate-800 text-[11px] text-slate-400 space-y-1 font-mono">
+                  <div className="font-bold text-slate-300">📦 Quick Installation Steps:</div>
+                  <div>1. Extract the downloaded <span className="text-cyan-300">pc-control-extension.zip</span>.</div>
+                  <div>2. Open <span className="text-cyan-300">chrome://extensions</span> $\rightarrow$ toggle <b>Developer mode</b> ON.</div>
+                  <div>3. Click <b>Load unpacked</b> $\rightarrow$ select the extracted folder.</div>
+                </div>
               </div>
 
             </div>
