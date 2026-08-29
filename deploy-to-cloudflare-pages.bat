@@ -1,5 +1,5 @@
 @echo off
-title Deploy Nexus Dashboard to Cloudflare Pages
+title Deploy PC Control Dashboard to Cloudflare Pages
 cd /d "%~dp0"
 
 echo ========================================================
@@ -15,7 +15,7 @@ echo ========================================================
 echo.
 echo If prompted to log in, Cloudflare will open your browser.
 echo.
-npx wrangler pages deploy dist --project-name=nexus-pc-control --commit-dirty=true
+npx wrangler pages deploy dist --project-name=pc-control-dashboard --commit-dirty=true
 
 echo ========================================================
 echo Deployment finished!

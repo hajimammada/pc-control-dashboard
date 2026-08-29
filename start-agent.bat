@@ -1,5 +1,5 @@
 @echo off
-title Nexus PC Agent
+title PC Control Agent
 cd /d "%~dp0\agent"
 node server.js
 pause

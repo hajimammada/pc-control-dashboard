@@ -1,8 +1,8 @@
 @echo off
-title Nexus PC Agent
+title PC Control Agent
 cd /d "%~dp0"
 echo ========================================================
-echo Starting Nexus PC Companion Agent...
+echo Starting PC Control Agent...
 echo ========================================================
 node server.js
 pause

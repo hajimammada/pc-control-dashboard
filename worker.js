@@ -52,7 +52,7 @@ export default {
       }
       return response;
     } catch (err) {
-      return new Response(`Nexus Dashboard: ${err.message}`, { status: 500 });
+      return new Response(`PC Control Dashboard: ${err.message}`, { status: 500 });
     }
   }
 };

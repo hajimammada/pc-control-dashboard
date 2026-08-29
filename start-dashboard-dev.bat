@@ -1,14 +1,14 @@
 @echo off
-title Nexus Command Center - Dev Mode
+title PC Control Dashboard - Dev Mode
 cd /d "%~dp0"
 
 echo ========================================================
-echo Starting Nexus PC Companion Agent...
+echo Starting PC Control Companion Agent...
 echo ========================================================
-start "Nexus PC Agent" cmd /c "cd agent && node server.js"
+start "PC Control Agent" cmd /c "cd agent && node server.js"
 
 echo ========================================================
-echo Starting Nexus Dashboard Web Client...
+echo Starting PC Control Dashboard Web Client...
 echo ========================================================
 cd client
 npm run dev

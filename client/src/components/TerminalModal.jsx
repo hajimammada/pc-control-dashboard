@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Terminal, Play, Trash2, Copy, Check, X, ShieldAlert, Cpu, HardDrive, Wifi, Sparkles, RefreshCw, CornerDownLeft } from 'lucide-react';
 import { executeTerminalCommand } from '../utils/api';
 
@@ -9,7 +9,7 @@ export default function TerminalModal({ isOpen, onClose, agentUrl, agentKey, isA
   const [commandLog, setCommandLog] = useState([
     {
       id: 'welcome',
-      command: '# Welcome to Nexus Remote PowerShell Console',
+      command: '# Welcome to Remote PowerShell Console',
       output: 'Ready to execute administrative commands via secure Cloudflare Tunnel.',
       error: '',
       exitCode: 0,

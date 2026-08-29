@@ -1,4 +1,4 @@
-# 🪐 Nexus PC Command Center — Remote Power & Telemetry Dashboard
+# 🪐 PC Control Dashboard — Remote Power & Telemetry Dashboard
 
 A futuristic, high-performance web dashboard for comprehensive remote PC power management (MacroDroid Wake-on-LAN Power-ON, remote Sleep, Restart, Shutdown, Lock), real-time hardware performance telemetry, remote PowerShell terminal console, and one-click remote desktop access (Chrome Remote Desktop & Google Antigravity).
 
@@ -11,7 +11,7 @@ A futuristic, high-performance web dashboard for comprehensive remote PC power m
    - Wakes up your PC, triggers smart plugs, or starts automated wake sequences from anywhere.
 
 2. **🔒 Remote Sleep, Restart, Shut Down, Lock from Anywhere**:
-   - Powered by a lightweight background Windows service (`NexusPCAgent`).
+   - Powered by a lightweight background Windows service (`PCCommandCenterAgent`).
    - Supports local network and **Cloudflare Tunnels** (`setup-pc-tunnel.bat`) to safely manage your PC from your phone or laptop anywhere in the world.
    - Instant 1-click confirmation with zero countdown lag.
 
@@ -32,7 +32,7 @@ A futuristic, high-performance web dashboard for comprehensive remote PC power m
 
 1. On your phone, set up a **MacroDroid** macro with a **Webhook Trigger** (e.g. `Wake / Power ON PC`).
 2. Copy the webhook URL provided by MacroDroid (`https://trigger.macrodroid.com/YOUR_DEVICE_ID/wake_my_pc`).
-3. In your Nexus Dashboard, click the **Settings (⚙️)** button in the top-right corner.
+3. In your PC Control Dashboard, click the **Settings (⚙️)** button in the top-right corner.
 4. Paste the URL into **"MacroDroid Power-ON Webhook URL"** and click **"Test Signal"**.
 5. Click **"Save Settings"**. You can now turn on your PC with 1 click on the dashboard!
 
@@ -44,7 +44,7 @@ To enable remote Sleep, Restart, Shutdown, Terminal execution, and live CPU/RAM 
 
 ### Option A: Automatic Startup Service (Recommended)
 Right-click `register-task.ps1` and select **Run with PowerShell (As Administrator)**.
-*(Registers `NexusPCAgent` in Windows Task Scheduler to start automatically on Windows boot).*
+*(Registers `PCCommandCenterAgent` in Windows Task Scheduler to start automatically on Windows boot).*
 
 ### Option B: Local Network (Same WiFi / LAN)
 Double-click:
@@ -64,7 +64,7 @@ setup-pc-tunnel.bat
 ## 📂 Project Architecture
 
 ```text
-nexus-dashboard/
+pc-control-dashboard/
 ├── agent/                         # PC Background Companion Daemon
 │   ├── server.js                  # Power APIs (Sleep/Restart/Shutdown/Lock), Terminal & Telemetry
 │   ├── tunnel.js                  # Automated Cloudflare Quick Tunnel provider
