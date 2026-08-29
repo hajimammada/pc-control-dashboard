@@ -23,6 +23,7 @@ import {
 import ConfirmPowerModal from './components/ConfirmPowerModal';
 import SettingsModal from './components/SettingsModal';
 import TerminalModal from './components/TerminalModal';
+import BookmarksBar from './components/BookmarksBar';
 import Toast from './components/Toast';
 
 import { 
@@ -33,7 +34,7 @@ import {
   executePowerAction 
 } from './utils/api';
 
-const APP_VERSION = 'v2.2.1';
+const APP_VERSION = 'v2.3.0';
 
 export default function App() {
   const [settings, setSettings] = useState(() => getStoredSettings());
@@ -155,6 +156,9 @@ export default function App() {
   return (
     <div className="min-h-screen bg-[#080b12] text-slate-100 flex flex-col justify-between selection:bg-cyan-500/30 selection:text-cyan-200">
       
+      {/* Top Chrome-Style Bookmarks Bar */}
+      <BookmarksBar />
+
       {/* Background ambient lighting */}
       <div className="fixed top-0 left-1/4 w-[500px] h-[500px] bg-cyan-500/5 rounded-full blur-3xl pointer-events-none"></div>
       <div className="fixed bottom-0 right-1/4 w-[500px] h-[500px] bg-blue-600/5 rounded-full blur-3xl pointer-events-none"></div>
