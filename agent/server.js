@@ -238,13 +238,26 @@ app.post('/api/power/lock', authenticate, (req, res) => {
   }, 300);
 });
 
-// Power: Unlock / Reconnect Workstation Session to Physical Console
+// Power: Unlock / Reconnect Workstation Session to Physical Console (Active, Disconnected, Fresh Boot)
 app.post('/api/power/unlock', authenticate, (req, res) => {
-  logAction(`[POWER] Unlock / Reconnect session command received from ${req.ip}`);
+  logAction(`[POWER] Enhanced unlock / reconnect session command received from ${req.ip}`);
 
-  // Query active / disconnected sessions dynamically
+  const unlockPsScript = path.join(__dirname, 'unlock-session.ps1');
+
+  // 1. Run the specialized PowerShell unlock script (handles fresh boot, cycle, and ESC dismissal)
+  if (fs.existsSync(unlockPsScript)) {
+    execFile(POWERSHELL_PATH, ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', unlockPsScript], (err, stdout, stderr) => {
+      if (err) {
+        logAction(`[POWER] unlock-session.ps1 error: ${err.message}`);
+      } else {
+        logAction(`[POWER] unlock-session.ps1 output: ${stdout ? stdout.trim() : 'OK'}`);
+      }
+    });
+  }
+
+  // 2. Parallel Native Session Handshake & Direct Attach
   exec('quser', (err, stdout) => {
-    let targetSessionId = '1'; // Default session ID
+    let targetSessionId = '1';
     if (stdout) {
       const lines = stdout.trim().split('\n');
       for (let line of lines) {
@@ -260,22 +273,18 @@ app.post('/api/power/unlock', authenticate, (req, res) => {
       }
     }
 
-    logAction(`[POWER] Attaching session ID ${targetSessionId} to console via tscon...`);
-    execFile(TSCON_PATH, [targetSessionId, '/dest:console'], (err2, stdout2, stderr2) => {
+    logAction(`[POWER] Native fallback: attaching session ${targetSessionId} to console via tscon...`);
+    execFile(TSCON_PATH, [targetSessionId, '/dest:console'], (err2) => {
       if (err2) {
-        logAction(`[POWER] tscon ${targetSessionId} /dest:console error: ${err2.message}`);
-        // Fallback: Try session 1 and session 2
         exec(`${TSCON_PATH} 1 /dest:console`);
         exec(`${TSCON_PATH} 2 /dest:console`);
-      } else {
-        logAction(`[POWER] Session ${targetSessionId} unlocked and re-attached to console.`);
       }
     });
+  });
 
-    res.json({
-      success: true,
-      message: `Session unlock signal dispatched to Console (Session ID: ${targetSessionId}).`
-    });
+  res.json({
+    success: true,
+    message: 'Enhanced workstation unlock signal dispatched (Console Handshake + UI Dismissal).'
   });
 });
 
