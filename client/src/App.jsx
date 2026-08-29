@@ -32,7 +32,7 @@ import {
   executePowerAction 
 } from './utils/api';
 
-const APP_VERSION = 'v2.1.2';
+const APP_VERSION = 'v2.1.3';
 
 export default function App() {
   const [settings, setSettings] = useState(() => getStoredSettings());
@@ -572,7 +572,7 @@ export default function App() {
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-cyan-400"></span>
-            <span className="font-semibold text-slate-300">Nexus PC Controller</span>
+            <span className="font-semibold text-slate-300">PC Command Center</span>
             <span className="text-cyan-400 font-mono font-bold text-[11px] bg-cyan-500/10 px-1.5 py-0.5 rounded border border-cyan-500/20">{APP_VERSION}</span>
             <span>• Remote PC Control Dashboard</span>
           </div>

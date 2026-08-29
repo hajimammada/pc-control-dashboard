@@ -10,8 +10,8 @@ try {
     $trigger = New-ScheduledTaskTrigger -AtStartup
     $principal = New-ScheduledTaskPrincipal -UserId "NT AUTHORITY\SYSTEM" -LogonType ServiceAccount -RunLevel Highest
     $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -RestartCount 5 -RestartInterval (New-TimeSpan -Minutes 1) -ExecutionTimeLimit (New-TimeSpan -Days 365)
-    Register-ScheduledTask -TaskName "NexusPCAgent" -Action $action -Trigger $trigger -Principal $principal -Settings $settings -Description "Nexus PC Companion Agent Boot Service" -Force
-    Start-ScheduledTask -TaskName "NexusPCAgent"
+    Register-ScheduledTask -TaskName "PCCommandCenterAgent" -Action $action -Trigger $trigger -Principal $principal -Settings $settings -Description "PC Command Center Agent Boot Service" -Force
+    Start-ScheduledTask -TaskName "PCCommandCenterAgent"
     Set-Content -Path $logPath -Value "SUCCESS"
 } catch {
     $logPath = Join-Path $PSScriptRoot "task_install.log"

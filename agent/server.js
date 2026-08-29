@@ -107,7 +107,7 @@ function getCpuUsage() {
 app.get('/api/ping', (req, res) => {
   res.json({
     status: 'online',
-    appName: 'Nexus PC Companion Agent',
+    appName: 'PC Command Center Agent',
     version: '1.0.0',
     timestamp: new Date().toISOString()
   });
@@ -329,7 +329,7 @@ function formatUptime(seconds) {
 app.get('/', (req, res) => {
   res.json({
     status: 'online',
-    service: 'Nexus PC Companion API',
+    service: 'PC Command Center API',
     version: '1.0.0'
   });
 });
@@ -337,7 +337,7 @@ app.get('/', (req, res) => {
 // Start Server
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`=======================================================`);
-  console.log(`🚀 Nexus PC Companion Agent is running on port ${PORT}`);
+  console.log(`🚀 PC Command Center Agent is running on port ${PORT}`);
   console.log(`Local Access:   http://localhost:${PORT}`);
   console.log(`Network Access: http://${getLanIp()}:${PORT}`);
   console.log(`Security:       ${AGENT_KEY ? 'Agent Key Configured (Secure)' : 'WARNING: AGENT_KEY NOT SET!'}`);

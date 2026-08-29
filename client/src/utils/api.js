@@ -1,6 +1,7 @@
-// Nexus Dashboard API & Storage Utilities
+// PC Command Center API & Storage Utilities
 
-const SETTINGS_KEY = 'nexus_dashboard_settings_v5';
+const SETTINGS_KEY = 'pc_command_center_settings_v1';
+const LEGACY_KEYS = ['nexus_dashboard_settings_v5', 'nexus_dashboard_settings_v4'];
 
 export const DEFAULT_SETTINGS = {
   macrodroidWebhookUrl: '', // e.g. https://trigger.macrodroid.com/xxxx/power-on
@@ -15,7 +16,17 @@ export const DEFAULT_SETTINGS = {
 // Load settings from localStorage
 export function getStoredSettings() {
   try {
-    const saved = localStorage.getItem(SETTINGS_KEY);
+    let saved = localStorage.getItem(SETTINGS_KEY);
+    if (!saved) {
+      for (const oldKey of LEGACY_KEYS) {
+        const legacy = localStorage.getItem(oldKey);
+        if (legacy) {
+          saved = legacy;
+          localStorage.setItem(SETTINGS_KEY, legacy);
+          break;
+        }
+      }
+    }
     if (saved) {
       return { ...DEFAULT_SETTINGS, ...JSON.parse(saved) };
     }
@@ -114,7 +125,7 @@ export function exportSettingsFile(settings) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = 'nexus-secrets.json';
+  a.download = 'pc-config-secrets.json';
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);

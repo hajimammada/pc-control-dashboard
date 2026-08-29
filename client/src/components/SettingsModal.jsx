@@ -67,7 +67,7 @@ export default function SettingsModal({
 
   const handleExport = () => {
     exportSettingsFile(formData);
-    onShowToast('Settings exported to nexus-secrets.json!', 'success');
+    onShowToast('Settings exported to pc-config-secrets.json!', 'success');
   };
 
   const handleSave = (e) => {
