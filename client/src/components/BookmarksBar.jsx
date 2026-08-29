@@ -117,11 +117,11 @@ export default function BookmarksBar() {
   };
 
   return (
-    <div className="w-full bg-[#080b13]/95 border-b border-slate-800/80 backdrop-blur-md px-4 py-1.5 flex items-center justify-between text-xs z-30 transition-all shadow-sm">
-      <div className="max-w-7xl mx-auto w-full flex items-center justify-between gap-2 overflow-x-auto scrollbar-none py-0.5" ref={dropdownRef}>
+    <div className="w-full bg-[#080b13]/95 border-b border-slate-800/80 backdrop-blur-md px-4 py-1.5 flex items-center justify-center text-xs z-30 transition-all shadow-sm">
+      <div className="max-w-7xl mx-auto w-full flex items-center justify-center gap-1 overflow-x-auto scrollbar-none py-0.5" ref={dropdownRef}>
         
-        {/* Left Bookmarks List */}
-        <div className="flex items-center gap-1 flex-nowrap">
+        {/* Centered Bookmarks List */}
+        <div className="flex items-center justify-center gap-1 flex-nowrap">
           {/* Chrome Apps shortcut icon */}
           <a
             href="chrome://apps"
@@ -157,7 +157,7 @@ export default function BookmarksBar() {
 
                   {/* Folder Dropdown Menu */}
                   {isOpen && (
-                    <div className="absolute top-full left-0 mt-1 w-56 rounded-2xl bg-[#111728] border border-slate-700 shadow-2xl p-1.5 z-50 animate-slide-up">
+                    <div className="absolute top-full left-0 mt-1 w-56 rounded-2xl bg-[#111728] border border-slate-700 shadow-2xl p-1.5 z-50 animate-slide-up text-left">
                       {item.children.map((child) => (
                         <a
                           key={child.id}
@@ -208,12 +208,6 @@ export default function BookmarksBar() {
               </a>
             );
           })}
-        </div>
-
-        {/* Right Status */}
-        <div className="flex items-center gap-2 text-[10px] text-slate-500 flex-shrink-0 pl-3">
-          <span className="w-1.5 h-1.5 rounded-full bg-cyan-400/80"></span>
-          <span className="font-mono text-slate-400">{isExtensionMode ? 'Chrome Bookmarks' : 'Quick Bookmarks'}</span>
         </div>
 
       </div>
