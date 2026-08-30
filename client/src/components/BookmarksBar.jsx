@@ -133,29 +133,62 @@ export default function BookmarksBar({ onOpenSettings }) {
     }
   };
 
-  // Filter other bookmarks when search query is entered
-  const filteredOtherBookmarks = useMemo(() => {
-    if (!searchQuery.trim()) return otherBookmarks;
+  // Helper to sort nodes: Folders above, Direct shortcuts below, then alphabetical A-Z
+  function sortBookmarkNodes(nodes) {
+    if (!nodes || !Array.isArray(nodes)) return [];
 
-    const q = searchQuery.toLowerCase();
-    function filterNodes(nodes) {
-      const matched = [];
-      for (const node of nodes) {
-        if (node.children && node.children.length > 0) {
-          const filteredChildren = filterNodes(node.children);
-          if (filteredChildren.length > 0 || node.title.toLowerCase().includes(q)) {
-            matched.push({
-              ...node,
-              children: filteredChildren.length > 0 ? filteredChildren : node.children
-            });
-          }
-        } else if (node.title?.toLowerCase().includes(q) || node.url?.toLowerCase().includes(q)) {
-          matched.push(node);
-        }
+    const folders = [];
+    const links = [];
+
+    for (const node of nodes) {
+      const isFolder = (node.children && node.children.length > 0) || node.isFolder;
+      if (isFolder) {
+        folders.push({
+          ...node,
+          children: sortBookmarkNodes(node.children || [])
+        });
+      } else {
+        links.push(node);
       }
-      return matched;
     }
-    return filterNodes(otherBookmarks);
+
+    // Sort folders alphabetically A-Z
+    folders.sort((a, b) => (a.title || '').localeCompare(b.title || '', undefined, { sensitivity: 'base', numeric: true }));
+
+    // Sort links alphabetically A-Z
+    links.sort((a, b) => (a.title || '').localeCompare(b.title || '', undefined, { sensitivity: 'base', numeric: true }));
+
+    // Folders above, direct shortcuts below
+    return [...folders, ...links];
+  }
+
+  // Filter and sort other bookmarks
+  const sortedAndFilteredOtherBookmarks = useMemo(() => {
+    let source = otherBookmarks;
+
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      function filterNodes(nodes) {
+        const matched = [];
+        for (const node of nodes) {
+          if (node.children && node.children.length > 0) {
+            const filteredChildren = filterNodes(node.children);
+            if (filteredChildren.length > 0 || node.title.toLowerCase().includes(q)) {
+              matched.push({
+                ...node,
+                children: filteredChildren.length > 0 ? filteredChildren : node.children
+              });
+            }
+          } else if (node.title?.toLowerCase().includes(q) || node.url?.toLowerCase().includes(q)) {
+            matched.push(node);
+          }
+        }
+        return matched;
+      }
+      source = filterNodes(otherBookmarks);
+    }
+
+    return sortBookmarkNodes(source);
   }, [otherBookmarks, searchQuery]);
 
   const isEmpty = barBookmarks.length === 0 && otherBookmarks.length === 0;
@@ -242,12 +275,12 @@ export default function BookmarksBar({ onOpenSettings }) {
                     Open Settings
                   </button>
                 </div>
-              ) : filteredOtherBookmarks.length === 0 ? (
+              ) : sortedAndFilteredOtherBookmarks.length === 0 ? (
                 <div className="p-4 text-center text-xs text-slate-500">
                   No bookmarks matching "{searchQuery}"
                 </div>
               ) : (
-                filteredOtherBookmarks.map((node) => (
+                sortedAndFilteredOtherBookmarks.map((node) => (
                   <BookmarkTreeItem
                     key={node.id}
                     item={node}
