@@ -14,6 +14,50 @@ import {
 
 const STORAGE_KEY = 'pc_control_custom_bookmarks_v1';
 
+// High-resolution transparent favicon renderer component
+function BookmarkFavicon({ url, embeddedIcon, title, className = "w-4 h-4" }) {
+  const [useFallback, setUseFallback] = useState(false);
+  const [hasError, setHasError] = useState(false);
+
+  // Compute live high-resolution 128px transparent favicon from domain
+  const primaryUrl = useMemo(() => {
+    if (!url) return null;
+    try {
+      const hostname = new URL(url).hostname.toLowerCase();
+      // Use Google's high-resolution transparent favicon service
+      return `https://www.google.com/s2/favicons?domain=${hostname}&sz=128`;
+    } catch {
+      return null;
+    }
+  }, [url]);
+
+  if (hasError) {
+    return <Globe className={`${className} text-slate-400 flex-shrink-0`} />;
+  }
+
+  const currentSrc = useFallback 
+    ? (embeddedIcon || 'https://www.google.com/favicon.ico') 
+    : (primaryUrl || embeddedIcon || 'https://www.google.com/favicon.ico');
+
+  return (
+    <div className={`${className} flex items-center justify-center flex-shrink-0 overflow-hidden`}>
+      <img
+        src={currentSrc}
+        alt={title || ""}
+        className="w-full h-full object-contain flex-shrink-0 transition-transform duration-200 group-hover:scale-110"
+        loading="lazy"
+        onError={() => {
+          if (!useFallback && embeddedIcon) {
+            setUseFallback(true);
+          } else {
+            setHasError(true);
+          }
+        }}
+      />
+    </div>
+  );
+}
+
 export default function BookmarksBar({ onOpenSettings }) {
   const [bookmarksData, setBookmarksData] = useState(() => {
     try {
@@ -121,17 +165,6 @@ export default function BookmarksBar({ onOpenSettings }) {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-
-  const getFaviconUrl = (url, customIcon) => {
-    if (customIcon) return customIcon;
-    if (!url) return null;
-    try {
-      const domain = new URL(url).hostname;
-      return `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
-    } catch {
-      return null;
-    }
-  };
 
   // Helper to sort nodes: Folders above, Direct shortcuts below, then alphabetical A-Z
   function sortBookmarkNodes(nodes) {
@@ -251,7 +284,7 @@ export default function BookmarksBar({ onOpenSettings }) {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search other bookmarks & folders..."
-                  className="w-full bg-[#0d1320] border border-slate-700/80 rounded-xl pl-8 pr-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 font-mono"
+                  className="w-full bg-[#080b13] border border-slate-700/80 rounded-xl pl-8 pr-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 font-mono"
                 />
               </div>
             )}
@@ -285,7 +318,6 @@ export default function BookmarksBar({ onOpenSettings }) {
                     key={node.id}
                     item={node}
                     level={0}
-                    getFaviconUrl={getFaviconUrl}
                     onLinkClick={() => setIsOtherOpen(false)}
                   />
                 ))
@@ -317,7 +349,6 @@ export default function BookmarksBar({ onOpenSettings }) {
             {barBookmarks.map((item) => {
               const isFolder = item.children && item.children.length > 0;
               const isOpen = activeFolderId === item.id;
-              const favicon = getFaviconUrl(item.url, item.iconUrl);
 
               if (isFolder) {
                 return (
@@ -354,11 +385,11 @@ export default function BookmarksBar({ onOpenSettings }) {
                             className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/80 transition-colors text-xs group cursor-pointer"
                             onClick={() => setActiveFolderId(null)}
                           >
-                            <img
-                              src={getFaviconUrl(child.url, child.iconUrl)}
-                              alt=""
-                              className="w-4 h-4 rounded-sm object-contain flex-shrink-0"
-                              onError={(e) => { e.target.style.display = 'none'; }}
+                            <BookmarkFavicon 
+                              url={child.url} 
+                              embeddedIcon={child.iconUrl} 
+                              title={child.title} 
+                              className="w-4 h-4" 
                             />
                             <span className="truncate flex-1">{child.title}</span>
                             <ExternalLink className="w-3 h-3 text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
@@ -378,19 +409,12 @@ export default function BookmarksBar({ onOpenSettings }) {
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 px-2.5 py-1 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/70 transition-colors text-xs font-medium flex-shrink-0 group cursor-pointer"
                 >
-                  {favicon ? (
-                    <img
-                      src={favicon}
-                      alt=""
-                      className="w-4 h-4 rounded-sm object-contain flex-shrink-0 group-hover:scale-110 transition-transform"
-                      onError={(e) => {
-                        e.target.onerror = null;
-                        e.target.src = 'https://www.google.com/favicon.ico';
-                      }}
-                    />
-                  ) : (
-                    <Globe className="w-3.5 h-3.5 text-slate-400" />
-                  )}
+                  <BookmarkFavicon 
+                    url={item.url} 
+                    embeddedIcon={item.iconUrl} 
+                    title={item.title} 
+                    className="w-4 h-4" 
+                  />
                   <span className="truncate max-w-[130px]">{item.title}</span>
                 </a>
               );
@@ -408,10 +432,9 @@ export default function BookmarksBar({ onOpenSettings }) {
 }
 
 // Recursive Bookmark Item inside Other Bookmarks Menu (Accordion for Folders)
-function BookmarkTreeItem({ item, level = 0, getFaviconUrl, onLinkClick }) {
+function BookmarkTreeItem({ item, level = 0, onLinkClick }) {
   const [isOpen, setIsOpen] = useState(false);
   const isFolder = item.children && item.children.length > 0;
-  const favicon = getFaviconUrl(item.url, item.iconUrl);
 
   if (isFolder) {
     return (
@@ -436,7 +459,6 @@ function BookmarkTreeItem({ item, level = 0, getFaviconUrl, onLinkClick }) {
                 key={child.id} 
                 item={child} 
                 level={level + 1} 
-                getFaviconUrl={getFaviconUrl} 
                 onLinkClick={onLinkClick} 
               />
             ))}
@@ -455,11 +477,11 @@ function BookmarkTreeItem({ item, level = 0, getFaviconUrl, onLinkClick }) {
       style={{ paddingLeft: `${8 + level * 12}px` }}
       onClick={onLinkClick}
     >
-      <img
-        src={favicon || 'https://www.google.com/favicon.ico'}
-        alt=""
-        className="w-3.5 h-3.5 rounded-sm object-contain flex-shrink-0"
-        onError={(e) => { e.target.onerror = null; e.target.src = 'https://www.google.com/favicon.ico'; }}
+      <BookmarkFavicon 
+        url={item.url} 
+        embeddedIcon={item.iconUrl} 
+        title={item.title} 
+        className="w-3.5 h-3.5" 
       />
       <span className="truncate flex-1">{item.title}</span>
       <ExternalLink className="w-3 h-3 text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
