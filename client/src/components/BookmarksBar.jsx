@@ -182,7 +182,10 @@ export default function BookmarksBar({ onOpenSettings }) {
 
         {/* OTHER BOOKMARKS FLOATING PANEL */}
         {isOtherOpen && (
-          <div className="absolute top-full left-0 mt-2 w-80 sm:w-96 max-h-[80vh] flex flex-col rounded-2xl bg-[#101726]/98 border border-slate-700/90 shadow-2xl p-3 z-50 animate-slide-up text-left backdrop-blur-2xl ring-1 ring-white/10">
+          <div 
+            className="absolute top-full left-0 mt-2 w-80 sm:w-96 max-h-[80vh] flex flex-col rounded-2xl border border-slate-700/90 shadow-[0_20px_60px_rgba(0,0,0,0.95)] p-3.5 z-50 animate-slide-up text-left ring-1 ring-white/10"
+            style={{ backgroundColor: '#0d1322' }}
+          >
             
             {/* Header */}
             <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-800">
@@ -302,7 +305,10 @@ export default function BookmarksBar({ onOpenSettings }) {
 
                     {/* Folder Dropdown Menu */}
                     {isOpen && (
-                      <div className="absolute top-full left-1/2 -translate-x-1/2 sm:left-0 sm:translate-x-0 mt-2 min-w-[250px] max-h-96 overflow-y-auto rounded-2xl bg-[#111728]/98 border border-slate-700/90 shadow-2xl p-2 z-50 animate-slide-up text-left backdrop-blur-xl ring-1 ring-white/10">
+                      <div 
+                        className="absolute top-full left-1/2 -translate-x-1/2 sm:left-0 sm:translate-x-0 mt-2 min-w-[250px] max-h-96 overflow-y-auto rounded-2xl border border-slate-700/90 shadow-[0_20px_60px_rgba(0,0,0,0.95)] p-2 z-50 animate-slide-up text-left ring-1 ring-white/10"
+                        style={{ backgroundColor: '#0d1322' }}
+                      >
                         <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-2.5 py-1 mb-1 border-b border-slate-800">
                           {item.title} ({item.children.length})
                         </div>
