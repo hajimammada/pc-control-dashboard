@@ -14,47 +14,108 @@ import {
 
 const STORAGE_KEY = 'pc_control_custom_bookmarks_v1';
 
-// High-resolution transparent favicon renderer component
-function BookmarkFavicon({ url, embeddedIcon, title, className = "w-4 h-4" }) {
-  const [useFallback, setUseFallback] = useState(false);
-  const [hasError, setHasError] = useState(false);
+// High-resolution brand icons and SVGs (transparent, vector-crisp)
+const BRAND_ICONS = {
+  'web.whatsapp.com': 'https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg',
+  'whatsapp.com': 'https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg',
+  'web.telegram.org': 'https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg',
+  'telegram.org': 'https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg',
+  'github.com': 'https://github.githubassets.com/favicons/favicon.svg',
+  'youtube.com': 'https://www.youtube.com/s/desktop/f1e737c3/img/favicon.ico',
+  'www.youtube.com': 'https://www.youtube.com/s/desktop/f1e737c3/img/favicon.ico',
+  'gemini.google.com': 'https://www.gstatic.com/lamda/images/gemini_sparkle_v002_d4735304ff6292a690345.svg',
+  'notebook.google.com': 'https://www.gstatic.com/pantheon/images/pantheon-favicon.ico',
+  'notebooklm.google.com': 'https://www.gstatic.com/pantheon/images/pantheon-favicon.ico',
+  'aistudio.google.com': 'https://aistudio.google.com/favicon.ico',
+  'mail.google.com': 'https://ssl.gstatic.com/ui/v1/icons/mail/rfr/gmail.ico',
+  'outlook.live.com': 'https://res.cdn.office.net/assets/mail/pwa/v1/pngs/outlook_24.png',
+  'outlook.com': 'https://res.cdn.office.net/assets/mail/pwa/v1/pngs/outlook_24.png',
+  'tradingview.com': 'https://www.tradingview.com/static/images/favicon.ico',
+  'www.tradingview.com': 'https://www.tradingview.com/static/images/favicon.ico',
+  'quizlet.com': 'https://quizlet.com/favicon.ico',
+  'duolingo.com': 'https://d35aaqx5ub952y.cloudfront.net/favicon.ico',
+  'www.duolingo.com': 'https://d35aaqx5ub952y.cloudfront.net/favicon.ico',
+  'stackoverflow.com': 'https://cdn.sstatic.net/Sites/stackoverflow/Img/favicon.ico',
+  'mexc.co': 'https://www.mexc.co/favicon.ico',
+  'mexc.com': 'https://www.mexc.co/favicon.ico',
+  'twitch.tv': 'https://static.twitchcdn.net/assets/favicon-32-e29e246c157142c94346.png',
+  'www.twitch.tv': 'https://static.twitchcdn.net/assets/favicon-32-e29e246c157142c94346.png',
+  'wikipedia.org': 'https://en.wikipedia.org/static/favicon/wikipedia.ico',
+  'en.wikipedia.org': 'https://en.wikipedia.org/static/favicon/wikipedia.ico',
+  'quora.com': 'https://qsf.fs.quoracdn.net/-4-images.favicon-new.ico-26-07ecf72515cdf3dd.ico',
+  'www.quora.com': 'https://qsf.fs.quoracdn.net/-4-images.favicon-new.ico-26-07ecf72515cdf3dd.ico',
+  'hackerrank.com': 'https://hrcdn.net/fcore/assets/work/header/hackerrank_logo-7661e5cd52.svg',
+  'www.hackerrank.com': 'https://hrcdn.net/fcore/assets/work/header/hackerrank_logo-7661e5cd52.svg',
+  'mega.nz': 'https://mega.nz/favicon.ico',
+  'coursera.org': 'https://d3njjcbhbojbot.cloudfront.net/web/images/favicons/favicon-v2-32x32.png',
+  'www.coursera.org': 'https://d3njjcbhbojbot.cloudfront.net/web/images/favicons/favicon-v2-32x32.png',
+  'udemy.com': 'https://www.udemy.com/staticx/udemy/images/v7/favicon-32x32.png',
+  'www.udemy.com': 'https://www.udemy.com/staticx/udemy/images/v7/favicon-32x32.png',
+  '21st.dev': 'https://21st.dev/favicon.ico'
+};
 
-  // Compute live high-resolution 128px transparent favicon from domain
-  const primaryUrl = useMemo(() => {
-    if (!url) return null;
+// High-resolution multi-stage transparent favicon component
+function BookmarkFavicon({ url, embeddedIcon, title, className = "w-4 h-4" }) {
+  const [stage, setStage] = useState(0);
+
+  const hostname = useMemo(() => {
+    if (!url) return '';
     try {
-      const hostname = new URL(url).hostname.toLowerCase();
-      // Use Google's high-resolution transparent favicon service
-      return `https://www.google.com/s2/favicons?domain=${hostname}&sz=128`;
+      return new URL(url).hostname.toLowerCase();
     } catch {
-      return null;
+      return '';
     }
   }, [url]);
 
-  if (hasError) {
+  // List of fallback image sources in order of quality
+  const sources = useMemo(() => {
+    const list = [];
+
+    // 1. Exact high-res brand vector or official favicon
+    if (hostname && BRAND_ICONS[hostname]) {
+      list.push(BRAND_ICONS[hostname]);
+    }
+    
+    // Also check root domain if subdomain
+    const rootDomain = hostname.split('.').slice(-2).join('.');
+    if (rootDomain && BRAND_ICONS[rootDomain] && !list.includes(BRAND_ICONS[rootDomain])) {
+      list.push(BRAND_ICONS[rootDomain]);
+    }
+
+    // 2. DuckDuckGo transparent icon API (crisp, high quality)
+    if (hostname) {
+      list.push(`https://icons.duckduckgo.com/ip3/${hostname}.ico`);
+    }
+
+    // 3. Google Favicon Service (sz=32)
+    if (hostname) {
+      list.push(`https://www.google.com/s2/favicons?domain=${hostname}&sz=32`);
+    }
+
+    // 4. Embedded HTML icon
+    if (embeddedIcon) {
+      list.push(embeddedIcon);
+    }
+
+    return list;
+  }, [hostname, embeddedIcon]);
+
+  if (stage >= sources.length) {
     return <Globe className={`${className} text-slate-400 flex-shrink-0`} />;
   }
 
-  const currentSrc = useFallback 
-    ? (embeddedIcon || 'https://www.google.com/favicon.ico') 
-    : (primaryUrl || embeddedIcon || 'https://www.google.com/favicon.ico');
+  const currentSrc = sources[stage];
 
   return (
-    <div className={`${className} flex items-center justify-center flex-shrink-0 overflow-hidden`}>
-      <img
-        src={currentSrc}
-        alt={title || ""}
-        className="w-full h-full object-contain flex-shrink-0 transition-transform duration-200 group-hover:scale-110"
-        loading="lazy"
-        onError={() => {
-          if (!useFallback && embeddedIcon) {
-            setUseFallback(true);
-          } else {
-            setHasError(true);
-          }
-        }}
-      />
-    </div>
+    <img
+      src={currentSrc}
+      alt={title || ""}
+      className={`${className} object-contain flex-shrink-0 rounded-sm transition-transform duration-200 group-hover:scale-110`}
+      loading="lazy"
+      onError={() => {
+        setStage(prev => prev + 1);
+      }}
+    />
   );
 }
 
