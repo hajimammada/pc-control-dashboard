@@ -34,7 +34,7 @@ import {
   executePowerAction 
 } from './utils/api';
 
-const APP_VERSION = 'v2.3.1';
+const APP_VERSION = 'v2.5.0';
 
 export default function App() {
   const [settings, setSettings] = useState(() => getStoredSettings());
@@ -251,288 +251,207 @@ export default function App() {
             <button
               onClick={handleTriggerMacroDroid}
               disabled={isTriggeringMacroDroid}
-              className="relative p-5 rounded-3xl bg-[#111728]/95 hover:bg-emerald-950/60 border border-emerald-500/30 hover:border-emerald-500/60 shadow-lg text-left transition-all duration-200 group flex flex-col justify-between cursor-pointer min-h-[170px]"
+              className="relative p-4 rounded-2xl bg-[#111728]/95 hover:bg-emerald-950/60 border border-emerald-500/30 hover:border-emerald-500/60 shadow-lg text-left transition-all duration-200 group flex flex-col justify-between cursor-pointer min-h-[105px]"
             >
-              <div className="flex items-center justify-between w-full mb-3">
-                <div className="p-3 rounded-2xl bg-emerald-500/10 text-emerald-400 group-hover:scale-110 transition-transform">
-                  <Power className={`w-6 h-6 ${isTriggeringMacroDroid ? 'animate-spin' : ''}`} />
+              <div className="flex items-center justify-between w-full mb-2">
+                <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-400 group-hover:scale-110 transition-transform">
+                  <Power className={`w-5 h-5 ${isTriggeringMacroDroid ? 'animate-spin' : ''}`} />
                 </div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                  Wake-on-LAN
+                <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                  Wake
                 </span>
               </div>
-              <div>
-                <h4 className="font-bold text-white text-base group-hover:text-emerald-300 transition-colors">
-                  {isTriggeringMacroDroid ? 'Waking PC...' : 'Turn ON PC'}
-                </h4>
-                <p className="text-xs text-slate-400 mt-1 leading-snug">
-                  MacroDroid power signal
-                </p>
-              </div>
+              <h4 className="font-bold text-white text-sm group-hover:text-emerald-300 transition-colors">
+                {isTriggeringMacroDroid ? 'Waking...' : 'Turn ON PC'}
+              </h4>
             </button>
 
             {/* 2. Unlock PC Tile */}
             <button
               onClick={() => handleRequestPowerAction('unlock')}
               disabled={!isAgentOnline}
-              className="relative p-5 rounded-3xl bg-[#111728]/95 hover:bg-cyan-950/60 border border-cyan-500/30 hover:border-cyan-500/60 shadow-lg text-left transition-all duration-200 group flex flex-col justify-between disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer min-h-[170px]"
+              className="relative p-4 rounded-2xl bg-[#111728]/95 hover:bg-cyan-950/60 border border-cyan-500/30 hover:border-cyan-500/60 shadow-lg text-left transition-all duration-200 group flex flex-col justify-between disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer min-h-[105px]"
             >
-              <div className="flex items-center justify-between w-full mb-3">
-                <div className="p-3 rounded-2xl bg-cyan-500/10 text-cyan-400 group-hover:scale-110 transition-transform">
-                  <Unlock className="w-6 h-6" />
+              <div className="flex items-center justify-between w-full mb-2">
+                <div className="p-2.5 rounded-xl bg-cyan-500/10 text-cyan-400 group-hover:scale-110 transition-transform">
+                  <Unlock className="w-5 h-5" />
                 </div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded-full border border-cyan-500/20">
+                <span className="text-[9px] font-bold uppercase tracking-wider text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded-full border border-cyan-500/20">
                   Console
                 </span>
               </div>
-              <div>
-                <h4 className="font-bold text-white text-base group-hover:text-cyan-300 transition-colors">
-                  Unlock PC
-                </h4>
-                <p className="text-xs text-slate-400 mt-1 leading-snug">
-                  Attach session to console
-                </p>
-              </div>
+              <h4 className="font-bold text-white text-sm group-hover:text-cyan-300 transition-colors">
+                Unlock PC
+              </h4>
             </button>
 
             {/* 3. Lock Workstation Tile */}
             <button
               onClick={() => handleRequestPowerAction('lock')}
               disabled={!isAgentOnline}
-              className="relative p-5 rounded-3xl bg-[#111728]/95 hover:bg-blue-950/60 border border-blue-500/30 hover:border-blue-500/60 shadow-lg text-left transition-all duration-200 group flex flex-col justify-between disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer min-h-[170px]"
+              className="relative p-4 rounded-2xl bg-[#111728]/95 hover:bg-blue-950/60 border border-blue-500/30 hover:border-blue-500/60 shadow-lg text-left transition-all duration-200 group flex flex-col justify-between disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer min-h-[105px]"
             >
-              <div className="flex items-center justify-between w-full mb-3">
-                <div className="p-3 rounded-2xl bg-blue-500/10 text-blue-400 group-hover:scale-110 transition-transform">
-                  <Lock className="w-6 h-6" />
+              <div className="flex items-center justify-between w-full mb-2">
+                <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-400 group-hover:scale-110 transition-transform">
+                  <Lock className="w-5 h-5" />
                 </div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full border border-blue-500/20">
+                <span className="text-[9px] font-bold uppercase tracking-wider text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full border border-blue-500/20">
                   Security
                 </span>
               </div>
-              <div>
-                <h4 className="font-bold text-white text-base group-hover:text-blue-300 transition-colors">
-                  Lock Screen
-                </h4>
-                <p className="text-xs text-slate-400 mt-1 leading-snug">
-                  Lock active desktop session
-                </p>
-              </div>
+              <h4 className="font-bold text-white text-sm group-hover:text-blue-300 transition-colors">
+                Lock Screen
+              </h4>
             </button>
 
             {/* 4. Sleep PC Tile */}
             <button
               onClick={() => handleRequestPowerAction('sleep')}
               disabled={!isAgentOnline}
-              className="relative p-5 rounded-3xl bg-[#111728]/95 hover:bg-indigo-950/60 border border-indigo-500/30 hover:border-indigo-500/60 shadow-lg text-left transition-all duration-200 group flex flex-col justify-between disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer min-h-[170px]"
+              className="relative p-4 rounded-2xl bg-[#111728]/95 hover:bg-indigo-950/60 border border-indigo-500/30 hover:border-indigo-500/60 shadow-lg text-left transition-all duration-200 group flex flex-col justify-between disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer min-h-[105px]"
             >
-              <div className="flex items-center justify-between w-full mb-3">
-                <div className="p-3 rounded-2xl bg-indigo-500/10 text-indigo-400 group-hover:scale-110 transition-transform">
-                  <Moon className="w-6 h-6" />
+              <div className="flex items-center justify-between w-full mb-2">
+                <div className="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-400 group-hover:scale-110 transition-transform">
+                  <Moon className="w-5 h-5" />
                 </div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full border border-indigo-500/20">
+                <span className="text-[9px] font-bold uppercase tracking-wider text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full border border-indigo-500/20">
                   Standby
                 </span>
               </div>
-              <div>
-                <h4 className="font-bold text-white text-base group-hover:text-indigo-300 transition-colors">
-                  Sleep Mode
-                </h4>
-                <p className="text-xs text-slate-400 mt-1 leading-snug">
-                  Low-power ACPI sleep
-                </p>
-              </div>
+              <h4 className="font-bold text-white text-sm group-hover:text-indigo-300 transition-colors">
+                Sleep Mode
+              </h4>
             </button>
 
             {/* 5. Restart PC Tile */}
             <button
               onClick={() => handleRequestPowerAction('restart')}
               disabled={!isAgentOnline}
-              className="relative p-5 rounded-3xl bg-[#111728]/95 hover:bg-amber-950/60 border border-amber-500/30 hover:border-amber-500/60 shadow-lg text-left transition-all duration-200 group flex flex-col justify-between disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer min-h-[170px]"
+              className="relative p-4 rounded-2xl bg-[#111728]/95 hover:bg-amber-950/60 border border-amber-500/30 hover:border-amber-500/60 shadow-lg text-left transition-all duration-200 group flex flex-col justify-between disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer min-h-[105px]"
             >
-              <div className="flex items-center justify-between w-full mb-3">
-                <div className="p-3 rounded-2xl bg-amber-500/10 text-amber-400 group-hover:rotate-180 transition-transform duration-500">
-                  <RotateCcw className="w-6 h-6" />
+              <div className="flex items-center justify-between w-full mb-2">
+                <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-400 group-hover:rotate-180 transition-transform duration-500">
+                  <RotateCcw className="w-5 h-5" />
                 </div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
+                <span className="text-[9px] font-bold uppercase tracking-wider text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
                   Reboot
                 </span>
               </div>
-              <div>
-                <h4 className="font-bold text-white text-base group-hover:text-amber-300 transition-colors">
-                  Restart PC
-                </h4>
-                <p className="text-xs text-slate-400 mt-1 leading-snug">
-                  Fast system restart
-                </p>
-              </div>
+              <h4 className="font-bold text-white text-sm group-hover:text-amber-300 transition-colors">
+                Restart PC
+              </h4>
             </button>
 
             {/* 6. Shut Down PC Tile */}
             <button
               onClick={() => handleRequestPowerAction('shutdown')}
               disabled={!isAgentOnline}
-              className="relative p-5 rounded-3xl bg-[#111728]/95 hover:bg-rose-950/60 border border-rose-500/30 hover:border-rose-500/60 shadow-lg text-left transition-all duration-200 group flex flex-col justify-between disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer min-h-[170px]"
+              className="relative p-4 rounded-2xl bg-[#111728]/95 hover:bg-rose-950/60 border border-rose-500/30 hover:border-rose-500/60 shadow-lg text-left transition-all duration-200 group flex flex-col justify-between disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer min-h-[105px]"
             >
-              <div className="flex items-center justify-between w-full mb-3">
-                <div className="p-3 rounded-2xl bg-rose-500/10 text-rose-400 group-hover:scale-110 transition-transform">
-                  <Power className="w-6 h-6" />
+              <div className="flex items-center justify-between w-full mb-2">
+                <div className="p-2.5 rounded-xl bg-rose-500/10 text-rose-400 group-hover:scale-110 transition-transform">
+                  <Power className="w-5 h-5" />
                 </div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-full border border-rose-500/20">
+                <span className="text-[9px] font-bold uppercase tracking-wider text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-full border border-rose-500/20">
                   Power Off
                 </span>
               </div>
-              <div>
-                <h4 className="font-bold text-white text-base group-hover:text-rose-300 transition-colors">
-                  Shut Down
-                </h4>
-                <p className="text-xs text-slate-400 mt-1 leading-snug">
-                  Complete hardware shutdown
-                </p>
-              </div>
+              <h4 className="font-bold text-white text-sm group-hover:text-rose-300 transition-colors">
+                Shut Down
+              </h4>
             </button>
 
           </div>
 
         </div>
 
-        {/* SECTION 2: REMOTE ACCESS GATEWAY (3 EQUAL-SIZED CYBER-GLASS CARDS) */}
+        {/* SECTION 2: REMOTE ACCESS & TOOLS (MINIMALIST COMPACT BUTTONS) */}
         <div className="mb-8">
           
-          <div className="flex items-center justify-between mb-4 px-1">
+          <div className="flex items-center justify-between mb-3 px-1">
             <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
               <Monitor className="w-4 h-4 text-cyan-400" />
-              Remote Access Gateway
+              Remote Access & Tools
             </h2>
-            <span className="text-xs text-slate-500">
-              Multi-Protocol Remote Connections
-            </span>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
             
-            {/* 1. Chrome Remote Desktop Card */}
-            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#12192b]/95 to-[#0e1424]/95 border border-blue-500/30 hover:border-blue-500/60 p-6 shadow-xl group transition-all duration-300 flex flex-col justify-between min-h-[260px]">
-              
-              <div className="flex items-start gap-4 mb-6">
-                <div className="w-14 h-14 rounded-2xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400 group-hover:scale-105 group-hover:bg-blue-500/20 transition-all duration-300 shrink-0">
-                  <Monitor className="w-7 h-7" />
+            {/* 1. Chrome Remote Desktop Button */}
+            <a
+              href={isAgentOnline ? remoteDesktopUrl : undefined}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => { if (!isAgentOnline) e.preventDefault(); }}
+              className={`p-4 rounded-2xl bg-[#111728]/95 border transition-all duration-200 flex items-center justify-between group ${
+                isAgentOnline 
+                  ? 'border-blue-500/30 hover:border-blue-500/60 hover:bg-blue-950/40 shadow-lg cursor-pointer' 
+                  : 'border-slate-800 opacity-40 cursor-not-allowed'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-400 group-hover:scale-110 transition-transform">
+                  <Monitor className="w-5 h-5" />
                 </div>
-
                 <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-bold text-white text-lg group-hover:text-blue-300 transition-colors">
-                      Chrome Remote
-                    </h3>
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">
-                      Screen GUI
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-300 mt-1.5 leading-relaxed">
-                    Full interactive desktop control, multi-monitor display, and file transfer directly in Chrome.
-                  </p>
+                  <h4 className="font-bold text-white text-sm group-hover:text-blue-300 transition-colors">
+                    Chrome Remote
+                  </h4>
+                  <span className="text-[10px] text-blue-400 font-mono">Screen GUI</span>
                 </div>
               </div>
-
-              {isAgentOnline ? (
-                <a
-                  href={remoteDesktopUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full py-3.5 px-5 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-blue-600/30 hover:shadow-blue-600/50 transition-all duration-200 cursor-pointer"
-                >
-                  <span>Launch Screen Control</span>
-                  <ArrowUpRight className="w-4 h-4" />
-                </a>
-              ) : (
-                <button
-                  disabled
-                  className="w-full py-3.5 px-5 rounded-2xl bg-blue-600/30 text-slate-400 font-bold text-xs flex items-center justify-center gap-2 opacity-40 cursor-not-allowed border border-blue-500/20"
-                >
-                  <span>Launch Screen Control</span>
-                  <ArrowUpRight className="w-4 h-4 text-slate-400" />
-                </button>
-              )}
-
-            </div>
+              <ArrowUpRight className="w-4 h-4 text-slate-500 group-hover:text-blue-400 transition-colors" />
+            </a>
 
             {/* 2. Google Antigravity Card */}
-            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#12192b]/95 to-[#0e1424]/95 border border-purple-500/30 hover:border-purple-500/60 p-6 shadow-xl group transition-all duration-300 flex flex-col justify-between min-h-[260px]">
-              
-              <div className="flex items-start gap-4 mb-6">
-                <div className="w-14 h-14 rounded-2xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 group-hover:scale-105 group-hover:bg-purple-500/20 transition-all duration-300 shrink-0">
-                  <Bot className="w-7 h-7" />
+            <a
+              href={isAgentOnline ? antigravityUrl : undefined}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => { if (!isAgentOnline) e.preventDefault(); }}
+              className={`p-4 rounded-2xl bg-[#111728]/95 border transition-all duration-200 flex items-center justify-between group ${
+                isAgentOnline 
+                  ? 'border-purple-500/30 hover:border-purple-500/60 hover:bg-purple-950/40 shadow-lg cursor-pointer' 
+                  : 'border-slate-800 opacity-40 cursor-not-allowed'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-purple-500/10 text-purple-400 group-hover:scale-110 transition-transform">
+                  <Bot className="w-5 h-5" />
                 </div>
-
                 <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-bold text-white text-lg group-hover:text-purple-300 transition-colors">
-                      Antigravity
-                    </h3>
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/20">
-                      AI Agent
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-300 mt-1.5 leading-relaxed">
-                    Access your Google Antigravity development workspace and agentic coding environment.
-                  </p>
+                  <h4 className="font-bold text-white text-sm group-hover:text-purple-300 transition-colors">
+                    Antigravity
+                  </h4>
+                  <span className="text-[10px] text-purple-400 font-mono">AI Agent</span>
                 </div>
               </div>
+              <ArrowUpRight className="w-4 h-4 text-slate-500 group-hover:text-purple-400 transition-colors" />
+            </a>
 
-              {isAgentOnline ? (
-                <a
-                  href={antigravityUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r from-purple-600 to-cyan-500 hover:from-purple-500 hover:to-cyan-400 text-slate-950 font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 transition-all duration-200 cursor-pointer"
-                >
-                  <span>Launch Antigravity</span>
-                  <ArrowUpRight className="w-4 h-4" />
-                </a>
-              ) : (
-                <button
-                  disabled
-                  className="w-full py-3.5 px-5 rounded-2xl bg-purple-600/30 text-slate-400 font-bold text-xs flex items-center justify-center gap-2 opacity-40 cursor-not-allowed border border-purple-500/20"
-                >
-                  <span>Launch Antigravity</span>
-                  <ArrowUpRight className="w-4 h-4 text-slate-400" />
-                </button>
-              )}
-
-            </div>
-
-            {/* 3. Remote PowerShell Terminal Card */}
-            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#12192b]/95 to-[#0e1424]/95 border border-emerald-500/30 hover:border-emerald-500/60 p-6 shadow-xl group transition-all duration-300 flex flex-col justify-between min-h-[260px]">
-              
-              <div className="flex items-start gap-4 mb-6">
-                <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 group-hover:scale-105 group-hover:bg-emerald-500/20 transition-all duration-300 shrink-0">
-                  <Terminal className="w-7 h-7" />
+            {/* 3. Remote PowerShell Terminal Button */}
+            <button
+              onClick={() => isAgentOnline && setIsTerminalOpen(true)}
+              disabled={!isAgentOnline}
+              className={`p-4 rounded-2xl bg-[#111728]/95 border transition-all duration-200 flex items-center justify-between group text-left ${
+                isAgentOnline 
+                  ? 'border-emerald-500/30 hover:border-emerald-500/60 hover:bg-emerald-950/40 shadow-lg cursor-pointer' 
+                  : 'border-slate-800 opacity-40 cursor-not-allowed'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-400 group-hover:scale-110 transition-transform">
+                  <Terminal className="w-5 h-5" />
                 </div>
-
                 <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-bold text-white text-lg group-hover:text-emerald-300 transition-colors">
-                      Remote Terminal
-                    </h3>
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                      PowerShell CLI
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-300 mt-1.5 leading-relaxed">
-                    Interactive command line console to run PowerShell scripts, check processes, and manage services.
-                  </p>
+                  <h4 className="font-bold text-white text-sm group-hover:text-emerald-300 transition-colors">
+                    Terminal
+                  </h4>
+                  <span className="text-[10px] text-emerald-400 font-mono">PowerShell CLI</span>
                 </div>
               </div>
-
-              <button
-                onClick={() => setIsTerminalOpen(true)}
-                disabled={!isAgentOnline}
-                className="w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
-              >
-                <Terminal className="w-4 h-4 text-slate-950" />
-                <span>Open PowerShell Console</span>
-              </button>
-
-            </div>
+              <ArrowUpRight className="w-4 h-4 text-slate-500 group-hover:text-emerald-400 transition-colors" />
+            </button>
 
           </div>
 
