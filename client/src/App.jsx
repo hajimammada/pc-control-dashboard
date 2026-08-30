@@ -395,7 +395,7 @@ export default function App() {
                 </div>
                 <div>
                   <h4 className="font-bold text-white text-sm group-hover:text-blue-300 transition-colors">
-                    Chrome Remote
+                    Remote Desktop
                   </h4>
                   <span className="text-[10px] text-blue-400 font-mono">Screen GUI</span>
                 </div>
