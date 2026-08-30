@@ -8,7 +8,8 @@ import {
   Bookmark,
   Search,
   X,
-  Folders
+  Folders,
+  LayoutGrid
 } from 'lucide-react';
 
 const STORAGE_KEY = 'pc_control_custom_bookmarks_v1';
@@ -162,25 +163,21 @@ export default function BookmarksBar({ onOpenSettings }) {
   return (
     <div className="relative w-full bg-[#080b13]/95 border-b border-slate-800/80 backdrop-blur-md px-4 py-1.5 flex items-center justify-between text-xs z-40 transition-all shadow-sm overflow-visible">
       
-      {/* 1. LEFT: Other Bookmarks Button */}
+      {/* 1. LEFT: Minimalist Grid Button */}
       <div className="relative flex items-center flex-shrink-0" ref={otherMenuRef}>
         <button
           onClick={() => {
             setIsOtherOpen(!isOtherOpen);
             setActiveFolderId(null);
           }}
-          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-colors cursor-pointer text-xs font-semibold ${
+          className={`flex items-center justify-center w-7 h-7 rounded-lg transition-colors cursor-pointer ${
             isOtherOpen 
               ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-md shadow-cyan-500/20' 
               : 'text-slate-400 hover:text-cyan-300 hover:bg-slate-800/70 border border-transparent'
           }`}
           title="Other Bookmarks"
         >
-          <Folders className="w-3.5 h-3.5 text-amber-400" />
-          <span className="hidden sm:inline">Other Bookmarks</span>
-          {otherBookmarks.length > 0 && (
-            <span className="text-[10px] text-slate-500 font-mono">({otherBookmarks.length})</span>
-          )}
+          <LayoutGrid className="w-3.5 h-3.5" />
         </button>
 
         {/* OTHER BOOKMARKS FLOATING PANEL */}
