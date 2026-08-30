@@ -34,7 +34,7 @@ import {
   executePowerAction 
 } from './utils/api';
 
-const APP_VERSION = 'v2.5.0';
+const APP_VERSION = 'v2.5.3';
 
 export default function App() {
   const [settings, setSettings] = useState(() => getStoredSettings());
