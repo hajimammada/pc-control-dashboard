@@ -47,8 +47,13 @@ export default function SettingsModal({
       try {
         const saved = localStorage.getItem(BOOKMARK_STORAGE_KEY);
         if (saved) {
-          const list = JSON.parse(saved);
-          setBookmarkCount(Array.isArray(list) ? list.length : 0);
+          const data = JSON.parse(saved);
+          if (Array.isArray(data)) {
+            setBookmarkCount(data.length);
+          } else {
+            const count = (data.barBookmarks?.length || 0) + (data.otherBookmarks?.length || 0);
+            setBookmarkCount(count);
+          }
         } else {
           setBookmarkCount(0);
         }
@@ -167,11 +172,12 @@ export default function SettingsModal({
           }
           // Parse HTML
           const parsedBookmarks = parseNetscapeBookmarksHtml(text);
-          if (parsedBookmarks && parsedBookmarks.length > 0) {
+          const totalFound = (parsedBookmarks.barBookmarks?.length || 0) + (parsedBookmarks.otherBookmarks?.length || 0);
+          if (totalFound > 0) {
             localStorage.setItem(BOOKMARK_STORAGE_KEY, JSON.stringify(parsedBookmarks));
             window.dispatchEvent(new CustomEvent('pc_control_bookmarks_updated', { detail: parsedBookmarks }));
-            setBookmarkCount(parsedBookmarks.length);
-            onShowToast(`Successfully imported ${parsedBookmarks.length} bookmarks & folders!`, 'success');
+            setBookmarkCount(totalFound);
+            onShowToast(`Successfully imported ${parsedBookmarks.barBookmarks?.length || 0} bar items and ${parsedBookmarks.otherBookmarks?.length || 0} other folders/apps!`, 'success');
           } else {
             onShowToast('Could not find bookmarks in this HTML file.', 'error');
           }

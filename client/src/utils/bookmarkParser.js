@@ -1,7 +1,10 @@
 // Utility to parse Chrome / Firefox / Safari exported Netscape Bookmark HTML files
+// Splits into barBookmarks (Bookmarks Bar) and otherBookmarks (Other Bookmarks / All Other Folders)
 
 export function parseNetscapeBookmarksHtml(htmlString) {
-  if (!htmlString || typeof htmlString !== 'string') return [];
+  if (!htmlString || typeof htmlString !== 'string') {
+    return { barBookmarks: [], otherBookmarks: [] };
+  }
 
   const parser = new DOMParser();
   const doc = parser.parseFromString(htmlString, 'text/html');
@@ -22,11 +25,16 @@ export function parseNetscapeBookmarksHtml(htmlString) {
 
         if (h3) {
           const folderTitle = h3.textContent.trim();
+          const isPersonalToolbar = h3.getAttribute('PERSONAL_TOOLBAR_FOLDER') === 'true' || 
+                                    h3.getAttribute('personal_toolbar_folder') === 'true' ||
+                                    folderTitle.toLowerCase().includes('bookmarks bar') ||
+                                    folderTitle.toLowerCase().includes('toolbar');
           const children = nextEl ? parseContainer(nextEl) : [];
           results.push({
             id: 'folder_' + Math.random().toString(36).substr(2, 9),
             title: folderTitle,
             isFolder: true,
+            isPersonalToolbar: isPersonalToolbar,
             children: children
           });
         } else if (a) {
@@ -52,49 +60,43 @@ export function parseNetscapeBookmarksHtml(htmlString) {
     return results;
   }
 
-  // Fallback: If DOMParser didn't give clean tree, also do robust token parser
   try {
     const rootDl = doc.querySelector('dl, DL');
     if (rootDl) {
       const allItems = parseContainer(rootDl);
-      
-      // Look for "Bookmarks bar" or "Bookmarks toolbar"
-      const bookmarksBar = allItems.find(item => 
-        item.isFolder && (
-          item.title.toLowerCase().includes('bookmarks bar') || 
-          item.title.toLowerCase().includes('toolbar')
-        )
-      );
 
-      if (bookmarksBar && bookmarksBar.children && bookmarksBar.children.length > 0) {
-        return bookmarksBar.children;
+      // Find the Bookmarks Bar folder
+      const barFolder = allItems.find(item => item.isFolder && item.isPersonalToolbar);
+
+      let barBookmarks = [];
+      let otherBookmarks = [];
+
+      if (barFolder) {
+        barBookmarks = barFolder.children || [];
+        otherBookmarks = allItems.filter(item => item !== barFolder);
+      } else {
+        // Look for item named "Bookmarks bar" or similar
+        const namedBar = allItems.find(item => item.isFolder && item.title.toLowerCase().includes('bar'));
+        if (namedBar) {
+          barBookmarks = namedBar.children || [];
+          otherBookmarks = allItems.filter(item => item !== namedBar);
+        } else {
+          barBookmarks = allItems;
+          otherBookmarks = [];
+        }
       }
 
-      if (allItems.length > 0) {
-        return allItems;
-      }
+      return {
+        barBookmarks,
+        otherBookmarks
+      };
     }
   } catch (e) {
-    console.warn('DOMParser failed, falling back to regex parser', e);
+    console.warn('DOMParser failed:', e);
   }
 
-  // Regex fallback parser
-  return regexBookmarkParser(htmlString);
-}
-
-function regexBookmarkParser(html) {
-  const items = [];
-  const linkRegex = /<A\s+HREF="([^"]+)"(?:\s+ADD_DATE="[^"]*")?(?:\s+ICON="([^"]*)")?[^>]*>([^<]+)<\/A>/gi;
-  let match;
-
-  while ((match = linkRegex.exec(html)) !== null) {
-    items.push({
-      id: 'bm_' + Math.random().toString(36).substr(2, 9),
-      url: match[1],
-      iconUrl: match[2] || null,
-      title: match[3]
-    });
-  }
-
-  return items;
+  return {
+    barBookmarks: [],
+    otherBookmarks: []
+  };
 }
